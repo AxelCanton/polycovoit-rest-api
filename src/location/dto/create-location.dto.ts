@@ -1,15 +1,17 @@
-import { LocationModel } from "../entities/location.entity";
+import { IsNotEmpty, IsString, IsNumber } from "class-validator";
+
 
 export class CreateLocationDto {
+    @IsString()
+    @IsNotEmpty()
     address: string;
+
+    @IsString()
+    @IsNotEmpty()
     city: string;
+
+    @IsNumber()
+    @IsNotEmpty()
     postalCode: number;
 
-    public static toEntity(dto: CreateLocationDto): LocationModel{
-        const loc: LocationModel = new LocationModel();
-        loc.address = dto.address;
-        loc.city = dto.city;
-        loc.postalCode = dto.postalCode;
-        return loc;
-    }
 }
