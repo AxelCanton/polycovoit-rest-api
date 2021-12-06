@@ -1,6 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
+
+export const UNIQUE_MAIL = 'UNIQUE_MAIL'
 
 @Entity()
+@Unique(UNIQUE_MAIL, ['mail'])
 export class User {
     @PrimaryGeneratedColumn()
     id: number;
