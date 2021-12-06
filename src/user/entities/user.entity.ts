@@ -1,4 +1,4 @@
-import { LocationModel } from "src/location/location/entities/location.entity";
+import { LocationModel } from "src/location/entities/location.entity";
 import { Column, Entity, PrimaryGeneratedColumn, Unique, OneToMany } from "typeorm";
 
 export const UNIQUE_MAIL = 'UNIQUE_MAIL'

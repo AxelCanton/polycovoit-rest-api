@@ -1,8 +1,10 @@
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { User } from "src/user/entities/user.entity";
+import { LocationModel} from "src/location/entities/location.entity";
 
 export const allEntities = [
-    User
+    User,
+    LocationModel
 ]
 
 export function databaseAccessModule() {
