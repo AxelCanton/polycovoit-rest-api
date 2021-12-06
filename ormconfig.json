@@ -1,0 +1,10 @@
+  {
+    "type": "mysql",
+    "host": "localhost",
+    "port": 3306,
+    "username": "polycovoit",
+    "password": "polycovoitmdp",
+    "database": "polycovoitDB",
+    "entities": ["dist/**/*.entity{.ts,.js}"],
+    "synchronize": true
+  }
