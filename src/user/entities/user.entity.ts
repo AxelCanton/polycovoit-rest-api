@@ -1,7 +1,10 @@
 import { LocationModel } from "src/location/location/entities/location.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, Unique, OneToMany } from "typeorm";
+
+export const UNIQUE_MAIL = 'UNIQUE_MAIL'
 
 @Entity()
+@Unique(UNIQUE_MAIL, ['mail'])
 export class User {
     @PrimaryGeneratedColumn()
     id: number;
