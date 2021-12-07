@@ -6,7 +6,7 @@ import { Reservation } from "src/reservation/entities/reservation.entity";
 export const allEntities = [
     User,
     LocationModel,
-    Reservation
+    Reservation,
 ]
 
 export function databaseAccessModule() {

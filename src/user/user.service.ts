@@ -37,6 +37,20 @@ export class UserService{
         }
     }
 
+    async findByMail(mail: string){
+        const user = await this.userRepository.find({
+            where: { 
+                mail
+            },
+        });
+
+        if(user){
+            return user;
+        } else {
+            throw new NotFoundException(`User ${mail} does not exist`);
+        }
+    }
+
     async create(createUserDto: CreateUserDto){
         try {
             createUserDto.password = await this.passwordService.hashPassword(createUserDto.password);
