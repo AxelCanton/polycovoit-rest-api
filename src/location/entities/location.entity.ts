@@ -1,7 +1,7 @@
 import { User } from "src/user/entities/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity()
+@Entity("locations")
 export class LocationModel {
     @PrimaryGeneratedColumn()
     id: number;

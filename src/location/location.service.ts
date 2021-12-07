@@ -9,9 +9,7 @@ import { LocationModel } from './entities/location.entity';
 export class LocationService {
   constructor(
     @InjectRepository(LocationModel)
-    private locationRepository: Repository<LocationModel>,
-    @InjectRepository(LocationModel)
-    private userRepository: Repository<LocationModel>
+    private locationRepository: Repository<LocationModel>
 ){}
 
   create(createLocationDto: CreateLocationDto) {

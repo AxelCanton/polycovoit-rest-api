@@ -1,5 +1,5 @@
-import { LocationModel } from "src/location/entities/location.entity";
-import { Reservation } from "src/reservation/entities/reservation.entity";
+import { LocationModel } from "../../location/entities/location.entity";
+import { Reservation } from "../../reservation/entities/reservation.entity";
 import { Column, Entity, PrimaryGeneratedColumn, Unique, OneToMany } from "typeorm";
 
 export const UNIQUE_MAIL = 'UNIQUE_MAIL'

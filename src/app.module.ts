@@ -4,10 +4,11 @@ import { UserModule } from './user/user.module';
 import { LocationModule} from './location/location.module'
 import { ReservationModule } from './reservation/reservation.module';
 import { AuthModule } from './auth/auth.module';
+import { configService } from './config/config.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(),
+    TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
     UserModule,
     LocationModule,
     ReservationModule,
