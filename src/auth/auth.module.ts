@@ -9,6 +9,7 @@ import { jwtConstants } from './constant';
 import { JwtStrategy } from './jwt.strategy';
 import { databaseAccessModule } from 'src/utils';
 import { PasswordService } from 'src/user/password.service';
+import { UserService } from 'src/user/user.service';
 
 @Module({
   imports: [ 
@@ -21,7 +22,7 @@ import { PasswordService } from 'src/user/password.service';
     databaseAccessModule()
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, PasswordService],
+  providers: [AuthService, LocalStrategy, JwtStrategy, PasswordService, UserService],
   exports: [AuthService]
 })
 export class AuthModule {}
