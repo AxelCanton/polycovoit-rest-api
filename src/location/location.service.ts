@@ -15,8 +15,7 @@ export class LocationService {
 ){}
 
   create(createLocationDto: CreateLocationDto) {
-    const loc: LocationModel = CreateLocationDto.toEntity(createLocationDto);
-    return this.locationRepository.create(loc);
+    return this.locationRepository.create(createLocationDto);
   }
 
 
@@ -29,8 +28,7 @@ export class LocationService {
   }
 
   update(id: number, updateLocationDto: UpdateLocationDto) {
-    const loc: LocationModel = UpdateLocationDto.toEntity(updateLocationDto);
-    this.locationRepository.update(loc.id, loc);
+    this.locationRepository.update(id, updateLocationDto);
   }
 
   remove(id: number) {
