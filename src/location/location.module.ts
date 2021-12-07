@@ -1,12 +1,10 @@
 import { Module } from '@nestjs/common';
 import { LocationService } from './location.service';
 import { LocationController } from './location.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/user/entities/user.entity';
-import { LocationModel } from './entities/location.entity';
+import { databaseAccessModule } from 'src/utils';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([LocationModel, User])],
+  imports: [databaseAccessModule()],
   controllers: [LocationController],
   providers: [LocationService]
 })

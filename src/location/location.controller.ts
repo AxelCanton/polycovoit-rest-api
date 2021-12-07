@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, NotFoundException } from '@nestjs/common';
 import { LocationService } from './location.service';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
+import { LocationModel } from './entities/location.entity';
 
 @Controller('location')
 export class LocationController {
@@ -12,14 +13,22 @@ export class LocationController {
     return this.locationService.create(createLocationDto);
   }
 
+  @Get()
+  findByUser(@Query('user') userId: string) {
+    return this.locationService.findByUser(+userId)
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.locationService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const location: LocationModel = await this.locationService.findOne(+id);
+    if (location === undefined) {
+      throw new NotFoundException("Location was not found");
+    }
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateLocationDto: UpdateLocationDto) {
-    return this.locationService.update(+id, updateLocationDto);
+    this.locationService.update(+id, updateLocationDto);
   }
 
   @Delete(':id')

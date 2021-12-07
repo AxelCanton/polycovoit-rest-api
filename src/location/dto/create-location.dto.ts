@@ -14,4 +14,7 @@ export class CreateLocationDto {
     @IsNotEmpty()
     postalCode: number;
 
+    @IsNumber()
+    @IsNotEmpty()
+    userId: number;
 }

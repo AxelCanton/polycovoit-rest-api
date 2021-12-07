@@ -15,7 +15,10 @@ export class LocationModel {
     @Column()
     city: String;
 
-    @ManyToOne(() => User, user => user.locations)
+    @ManyToOne(() => User, user => user.locations, {
+        nullable: false,
+        onDelete: "CASCADE"
+    })
     user: User;
 
 }
