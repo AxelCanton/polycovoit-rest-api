@@ -37,28 +37,30 @@ export class UserService{
         }
     }
 
-    async findByMail(mail: string){
-        const user = await this.userRepository.find({
-            where: { 
-                mail
-            },
+    async findByMail(email: string){
+        const user: User = await this.userRepository.findOne({
+            email: email
         });
 
         if(user){
             return user;
         } else {
-            throw new NotFoundException(`User ${mail} does not exist`);
+            throw new NotFoundException(`User ${email} does not exist`);
         }
     }
 
     async create(createUserDto: CreateUserDto){
         try {
-            createUserDto.password = await this.passwordService.hashPassword(createUserDto.password);
-            const {password, ...res} = await this.userRepository.save(createUserDto);
-            return res;
+            const user: User = new User();
+            user.firstName = createUserDto.firstName;
+            user.lastName = createUserDto.lastName;
+            user.email = createUserDto.email;
+            user.password = await this.passwordService.hashPassword(createUserDto.password);
+            user.isAdmin = false;
+            return await this.userRepository.save(user);
         } catch (error) {
             if(isConstraint(error,UNIQUE_MAIL)){
-                throw new BadRequestException('This mail is already used');
+                throw new BadRequestException('This email is already used');
             } else {
                 throw new InternalServerErrorException('Unable to create new user')
             }
@@ -76,7 +78,7 @@ export class UserService{
             return await this.findOne(id);
         } catch (error) {
             if(isConstraint(error,UNIQUE_MAIL)){
-                throw new BadRequestException('This mail is already used');
+                throw new BadRequestException('This email is already used');
             } else {
                 throw new InternalServerErrorException('Unable to update new user')
             }

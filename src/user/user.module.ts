@@ -9,7 +9,8 @@ import { UserService } from "./user.service";
 @Module({
     imports: [databaseAccessModule()],
     providers: [UserService,PasswordService],
-    controllers: [UserController]
+    controllers: [UserController],
+    exports: [UserService, PasswordService]
 })
 
 export class UserModule {};

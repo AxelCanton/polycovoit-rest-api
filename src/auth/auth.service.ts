@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PasswordService } from 'src/user/password.service';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -12,25 +13,21 @@ export class AuthService {
         private jwtService: JwtService
     ){}
 
-    async validateUser(mail: string, password: string): Promise<any>{
-        const user = await this.userService.findByMail(mail);
-
-        if(user[0]){
-            const validPassword = await this.passwordService.checkPassword(user[0].password, password);
+    async validateUser(email: string, password: string): Promise<User | null>{
+        const user: User = await this.userService.findByMail(email);
+        if(user){
+            const validPassword: boolean = await this.passwordService.checkPassword(password, user.password);
             if(validPassword){
-                const { password, ...res}  = user[0];
-                return res;
+                return user;
             }
         }
-
         return null;    
     }
 
     async login(user: any){
         const accessTokenPayload = {
-            mail: user.mail,
-            sub: user.id,
-            accessToken: true
+            email: user.email,
+            sub: user.id
         }
 
         const refreshTokenPayload = {
@@ -46,18 +43,18 @@ export class AuthService {
         }
     }
 
-    async refresh(refreshToken: string) {
-        const data = await this.jwtService.verifyAsync<{
-            sub: number;
-            refresh_token?: boolean;
-        }>(refreshToken);
+    // async refresh(refreshToken: string) {
+    //     const data = await this.jwtService.verifyAsync<{
+    //         sub: number;
+    //         refresh_token?: boolean;
+    //     }>(refreshToken);
 
-        if (data.refresh_token) {
-            const user = await this.userService.findOne(data.sub);
-            if (user) {
-                return await this.login(user);
-            }
-        }
-        throw new BadRequestException('The provided token is not a refresh token');
-    }
+    //     if (data.refresh_token) {
+    //         const user = await this.userService.findOne(data.sub);
+    //         if (user) {
+    //             return await this.login(user);
+    //         }
+    //     }
+    //     throw new BadRequestException('The provided token is not a refresh token');
+    // }
 }
