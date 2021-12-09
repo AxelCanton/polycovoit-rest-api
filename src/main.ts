@@ -16,9 +16,11 @@ async function bootstrap() {
   .setDescription('A swagger documentation to explain all the routes')
   .build();
 
+  // Swagger doc
   const document = SwaggerModule.createDocument(app,config);
   SwaggerModule.setup('api', app, document);
 
+  // Add guards, interceptor, and pipes
   const reflector = app.get( Reflector );
   const globalInterceptors: NestInterceptor[] = [];
   
@@ -30,6 +32,12 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe(validationConfig));
   app.useGlobalGuards(new JwtAuthGuard(reflector),new RolesGuard(reflector)); // JwtAuthGuard must be executed before RolesGuard (the latter uses the former to validate)
   app.useGlobalInterceptors(...globalInterceptors);
+
+
+  // Enable CORS
+  app.enableCors({
+    origin: "http://localhost:3000"
+  })
 
   await app.listen(process.env.SERVER_PORT || 5000);
 }
