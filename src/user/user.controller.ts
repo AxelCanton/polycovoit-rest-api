@@ -1,5 +1,4 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from "@nestjs/common";
-import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
 import { Public } from "src/utils/roles/public.decorator";
 import { RoleEnum } from "src/utils/roles/role.enum";
 import { Role } from "src/utils/roles/roles.decorator";
@@ -17,28 +16,32 @@ export class UserController{
 
     @Public()
     @Post()
-    create(@Body() createUserDto: CreateUserDto){
-        return this.userService.create(createUserDto);
+    async create(@Body() createUserDto: CreateUserDto){
+        const user = await this.userService.create(createUserDto); 
+        return user;
     }
 
     @Get()
-    findAll(){
-        return this.userService.findAll();
+    async findAll(){
+        const users = await this.userService.findAll();
+        return users;
     }
 
     @Get(':id')
-    findOne(@Param('id') id: string){
-        return this.userService.findOne(+id);
+    async findOne(@Param('id') id: string){
+        const user = await this.userService.findOne(+id);
+        return user;
     }
 
     @Patch(':id')
-    update(@Body() updateUserDto: UpdateUserDto, @Param('id') id: string){
-        return this.userService.update(updateUserDto,+id);
+    async update(@Body() updateUserDto: UpdateUserDto, @Param('id') id: string){
+        const user = await this.userService.update(updateUserDto,+id);
+        return user;
     }
 
     @Delete(':id')
-    delete(@Param('id') id: string){
-        return this.userService.delete(+id);
+    async delete(@Param('id') id: string){
+        await this.userService.delete(+id);
     }
 
 }
