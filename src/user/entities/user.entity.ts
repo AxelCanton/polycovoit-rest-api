@@ -24,6 +24,12 @@ export class User {
     @Exclude()
     password: string;
 
+    @Column({
+        default: ''
+    })
+    @Exclude()
+    refreshToken: string;
+
     @Column()
     isAdmin: boolean;
 
