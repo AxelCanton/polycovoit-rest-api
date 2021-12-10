@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { isConstraint } from "src/utils";
-import { Repository, UpdateResult } from "typeorm";
+import { Repository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { UNIQUE_MAIL, User } from "./entities/user.entity";
@@ -18,20 +18,14 @@ export class UserService{
 
     async findAll(){
         const users = await this.userRepository.find();
-
-        return users.map((user) => {
-            const { password, ...res} = user;
-
-            return res;
-        })
+        return users;
     }
 
     async findOne(id: number){
         const user = await this.userRepository.findOne(id);
 
         if(user){
-            const {password, ...res} = user;
-            return res;
+            return user;
         } else {
             throw new NotFoundException(`User ${id} does not exist`);
         }
@@ -75,7 +69,8 @@ export class UserService{
 
         try {
             await this.userRepository.update(id, updateUserDto);
-            return await this.findOne(id);
+            const user = await this.findOne(id);
+            return user;
         } catch (error) {
             if(isConstraint(error,UNIQUE_MAIL)){
                 throw new BadRequestException('This email is already used');
@@ -110,8 +105,6 @@ export class UserService{
         if(result.affected === 0){
             throw new NotFoundException()
         }
-
-        return result;
     }
 
 };
