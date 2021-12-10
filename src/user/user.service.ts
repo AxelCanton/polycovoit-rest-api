@@ -85,6 +85,25 @@ export class UserService{
         }
     }
 
+    async updateRefreshToken(refreshToken: string, id: number) {
+        try {
+            await this.userRepository.update(id, {
+                refreshToken: refreshToken
+            });
+        } catch(error) {
+            throw new InternalServerErrorException();
+        }
+    }
+
+    async compareRefreshToken(newRefreshToken: string, id: number): Promise<boolean> {
+        try {
+            const user = await this.userRepository.findOne(id);
+            return user.refreshToken === newRefreshToken;
+        } catch(error) {
+            throw new InternalServerErrorException();
+        }
+    }
+
     async delete(id: number){
         const result = await this.userRepository.delete(id);
 

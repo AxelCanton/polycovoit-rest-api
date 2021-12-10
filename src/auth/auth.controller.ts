@@ -16,8 +16,9 @@ export class AuthController {
     return await this.authService.login(req.user);
   }
 
-  // @Post('refresh')
-  //   async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
-  //       return this.authService.refresh(refreshTokenDto.refresh_token);
-  //   }
+  @Public()
+  @Post('refresh')
+    async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
+        return this.authService.refresh(refreshTokenDto.refresh_token);
+    }
 }
