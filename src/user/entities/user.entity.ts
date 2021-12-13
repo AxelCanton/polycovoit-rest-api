@@ -1,11 +1,12 @@
 import { LocationModel } from "../../location/entities/location.entity";
 import { Reservation } from "../../reservation/entities/reservation.entity";
 import { Column, Entity, PrimaryGeneratedColumn, Unique, OneToMany } from "typeorm";
+import { Exclude } from 'class-transformer';
 
 export const UNIQUE_MAIL = 'UNIQUE_MAIL'
 
 @Entity()
-@Unique(UNIQUE_MAIL, ['mail'])
+@Unique(UNIQUE_MAIL, ['email'])
 export class User {
     @PrimaryGeneratedColumn()
     id: number;
@@ -17,10 +18,20 @@ export class User {
     lastName: string;
 
     @Column()
-    mail: string;
+    email: string;
 
     @Column()
+    @Exclude()
     password: string;
+
+    @Column({
+        default: ''
+    })
+    @Exclude()
+    refreshToken: string;
+
+    @Column()
+    isAdmin: boolean;
 
     @OneToMany(() => LocationModel, location => location.user)
     locations: LocationModel[];

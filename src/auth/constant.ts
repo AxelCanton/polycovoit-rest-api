@@ -2,4 +2,6 @@
 
 export const jwtConstants = {
     secret: 'secretKey',
+    expiredTokenErrorMessage: 'Token expired',
+    malformedTokenErrorMessage:'Malformed token'
   };

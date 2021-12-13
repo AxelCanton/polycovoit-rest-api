@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { isConstraint } from "src/utils";
-import { Repository, UpdateResult } from "typeorm";
+import { Repository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { UNIQUE_MAIL, User } from "./entities/user.entity";
@@ -18,47 +18,43 @@ export class UserService{
 
     async findAll(){
         const users = await this.userRepository.find();
-
-        return users.map((user) => {
-            const { password, ...res} = user;
-
-            return res;
-        })
+        return users;
     }
 
     async findOne(id: number){
         const user = await this.userRepository.findOne(id);
 
         if(user){
-            const {password, ...res} = user;
-            return res;
+            return user;
         } else {
             throw new NotFoundException(`User ${id} does not exist`);
         }
     }
 
-    async findByMail(mail: string){
-        const user = await this.userRepository.find({
-            where: { 
-                mail
-            },
+    async findByMail(email: string){
+        const user: User = await this.userRepository.findOne({
+            email: email
         });
 
         if(user){
             return user;
         } else {
-            throw new NotFoundException(`User ${mail} does not exist`);
+            throw new NotFoundException(`User ${email} does not exist`);
         }
     }
 
     async create(createUserDto: CreateUserDto){
         try {
-            createUserDto.password = await this.passwordService.hashPassword(createUserDto.password);
-            const {password, ...res} = await this.userRepository.save(createUserDto);
-            return res;
+            const user: User = new User();
+            user.firstName = createUserDto.firstName;
+            user.lastName = createUserDto.lastName;
+            user.email = createUserDto.email;
+            user.password = await this.passwordService.hashPassword(createUserDto.password);
+            user.isAdmin = false;
+            return await this.userRepository.save(user);
         } catch (error) {
             if(isConstraint(error,UNIQUE_MAIL)){
-                throw new BadRequestException('This mail is already used');
+                throw new BadRequestException('This email is already used');
             } else {
                 throw new InternalServerErrorException('Unable to create new user')
             }
@@ -73,13 +69,33 @@ export class UserService{
 
         try {
             await this.userRepository.update(id, updateUserDto);
-            return await this.findOne(id);
+            const user = await this.findOne(id);
+            return user;
         } catch (error) {
             if(isConstraint(error,UNIQUE_MAIL)){
-                throw new BadRequestException('This mail is already used');
+                throw new BadRequestException('This email is already used');
             } else {
                 throw new InternalServerErrorException('Unable to update new user')
             }
+        }
+    }
+
+    async updateRefreshToken(refreshToken: string, id: number) {
+        try {
+            await this.userRepository.update(id, {
+                refreshToken: refreshToken
+            });
+        } catch(error) {
+            throw new InternalServerErrorException();
+        }
+    }
+
+    async compareRefreshToken(newRefreshToken: string, id: number): Promise<boolean> {
+        try {
+            const user = await this.userRepository.findOne(id);
+            return user.refreshToken === newRefreshToken;
+        } catch(error) {
+            throw new InternalServerErrorException();
         }
     }
 
@@ -89,8 +105,6 @@ export class UserService{
         if(result.affected === 0){
             throw new NotFoundException()
         }
-
-        return result;
     }
 
 };

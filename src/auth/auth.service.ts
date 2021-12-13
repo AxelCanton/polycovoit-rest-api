@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PasswordService } from 'src/user/password.service';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -12,48 +13,62 @@ export class AuthService {
         private jwtService: JwtService
     ){}
 
-    async validateUser(mail: string, password: string): Promise<any>{
-        const user = await this.userService.findByMail(mail);
-
-        if(user[0]){
-            const validPassword = await this.passwordService.checkPassword(user[0].password, password);
+    async validateUser(email: string, password: string): Promise<User | null>{
+        const user: User = await this.userService.findByMail(email);
+        if(user){
+            const validPassword: boolean = await this.passwordService.checkPassword(password, user.password);
             if(validPassword){
-                const { password, ...res}  = user[0];
-                return res;
+                return user;
             }
         }
-
         return null;    
     }
 
     async login(user: any){
         const accessTokenPayload = {
-            mail: user.mail,
-            sub: user.id,
-            accessToken: true
-        }
+            email: user.email,
+            sub: user.id
+        };
 
         const refreshTokenPayload = {
             sub: user.id,
             refreshToken: true
-        }
+        };
+
+        const accessToken = await this.jwtService.signAsync(accessTokenPayload)
+
+        const refreshToken = await this.jwtService.signAsync(refreshTokenPayload, {
+            expiresIn: '14d'
+        });
+
+        this.userService.updateRefreshToken(refreshToken, user.id);
 
         return {
-            access_token: await this.jwtService.signAsync(accessTokenPayload),
-            refresh_token: await this.jwtService.signAsync(refreshTokenPayload, {
-                expiresIn: '2d'
-            })
+            access_token: accessToken,
+            refresh_token: refreshToken
         }
     }
 
     async refresh(refreshToken: string) {
         const data = await this.jwtService.verifyAsync<{
             sub: number;
-            refresh_token?: boolean;
+            refreshToken?: boolean;
         }>(refreshToken);
+        const userId = data.sub;
 
-        if (data.refresh_token) {
-            const user = await this.userService.findOne(data.sub);
+        if (data.refreshToken) {
+            // Compare the provided refresh token with the one stored in the database
+            const isValidRefreshToken = await this.userService.compareRefreshToken(refreshToken, userId);
+            if(!isValidRefreshToken){
+                /*
+                If a user tries to refresh the token with an invalid refresh token (i.e. with an old refresh token),
+                the current refresh token is invalided.
+                This is meant to avoid a malicious user to retrieve an access token with an outdated refresh token
+                */
+                this.userService.updateRefreshToken("", userId);
+                throw new BadRequestException('Invalid provided refresh token')
+            }
+            const user = await this.userService.findOne(userId);
             if (user) {
                 return await this.login(user);
             }

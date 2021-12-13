@@ -3,8 +3,11 @@ import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { RoleEnum } from 'src/utils/roles/role.enum';
+import { Role } from 'src/utils/roles/roles.decorator';
 
 @ApiTags('Reservation')
+@Role(RoleEnum.Admin)
 @Controller('reservation')
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
@@ -14,7 +17,7 @@ export class ReservationController {
   @ApiBadRequestResponse({description:"Bad parameters, reservation not created"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
   create(@Body() createReservationDto: CreateReservationDto) {
-    return this.reservationService.create(createReservationDto);
+    // return this.reservationService.create(createReservationDto);
   }
 
   @Get()

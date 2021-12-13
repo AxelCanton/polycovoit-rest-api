@@ -4,8 +4,11 @@ import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { LocationModel } from './entities/location.entity';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { RoleEnum } from 'src/utils/roles/role.enum';
+import { Role } from 'src/utils/roles/roles.decorator';
 
 @ApiTags('Location')
+@Role(RoleEnum.User)
 @Controller('location')
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
@@ -35,6 +38,7 @@ export class LocationController {
     if (location === undefined) {
       throw new NotFoundException("Location was not found");
     }
+    return location;
   }
 
   @Patch(':id')

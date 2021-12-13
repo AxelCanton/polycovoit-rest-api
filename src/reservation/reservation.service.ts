@@ -1,5 +1,7 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { LocationModel } from 'src/location/entities/location.entity';
+import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
@@ -10,12 +12,23 @@ export class ReservationService {
 
   constructor(
     @InjectRepository(Reservation)
-    private reservationRepository: Repository<Reservation>
+    private reservationRepository: Repository<Reservation>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    @InjectRepository(LocationModel)
+    private locationRepository: Repository<LocationModel>,
   ){}
 
-  async create(createReservationDto: CreateReservationDto) {
+  async create(createReservationDto: CreateReservationDto, idAskingUser: number) {
     try{
-      return await this.reservationRepository.save(createReservationDto);
+      const reservation: Reservation = new Reservation();
+      const location: LocationModel = await this.locationRepository.findOne(createReservationDto.locationId);
+      reservation.accepted = false;
+      reservation.message = createReservationDto.message;
+      reservation.askingUser = await this.userRepository.findOne(idAskingUser);
+      reservation.receivingUser = location.user;
+      reservation.location = location;
+      return await this.reservationRepository.save(reservation);
     } catch (error) {
       throw new InternalServerErrorException('Unable to create new reservation')
     }
