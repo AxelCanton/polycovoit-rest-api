@@ -7,15 +7,13 @@ import { LocalAuthGuard } from './local-auth.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
-@Controller()
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  @ApiResponse({ status:201, description:"User logged in"})
-  @Post('auth/login')
+  @ApiResponse({ status:200, description:"User logged in"})
   @HttpCode(200)
   async login(@Request() req){
     return await this.authService.login(req.user);
@@ -23,6 +21,7 @@ export class AuthController {
 
   @Public()
   @Post('refresh')
+  @HttpCode(200)
     async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
         return this.authService.refresh(refreshTokenDto.refresh_token);
     }
