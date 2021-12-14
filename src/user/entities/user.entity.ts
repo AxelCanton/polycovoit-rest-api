@@ -21,6 +21,9 @@ export class User {
     email: string;
 
     @Column()
+    gender: string
+
+    @Column()
     @Exclude()
     password: string;
 

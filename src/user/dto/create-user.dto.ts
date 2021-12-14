@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString, IsEmail } from "class-validator";
+import { IsNotEmpty, IsString, IsEmail, IsEnum } from "class-validator";
+import { GenderEnum } from "../enum/gender.enum";
 
 export class CreateUserDto{
     @ApiProperty()
@@ -22,4 +23,10 @@ export class CreateUserDto{
     @IsString()
     @IsNotEmpty()
     password: string;
+
+
+    @ApiProperty()
+    @IsEnum(GenderEnum)
+    @IsNotEmpty()
+    gender: string;
 }

@@ -51,6 +51,7 @@ export class UserService{
             user.email = createUserDto.email;
             user.password = await this.passwordService.hashPassword(createUserDto.password);
             user.isAdmin = false;
+            user.gender = createUserDto.gender;
             return await this.userRepository.save(user);
         } catch (error) {
             if(isConstraint(error,UNIQUE_MAIL)){
