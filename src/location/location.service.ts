@@ -15,8 +15,8 @@ export class LocationService {
     private userRepository: Repository<User>
 ){}
 
-  async create(createLocationDto: CreateLocationDto) {
-    const user: User = await this.userRepository.findOne(createLocationDto.userId)
+  async create(createLocationDto: CreateLocationDto, userId) {
+    const user: User = await this.userRepository.findOne(userId);
     if(user === undefined) {
       throw new NotFoundException("User not found");
     }
@@ -25,12 +25,27 @@ export class LocationService {
     location.city = createLocationDto.city;
     location.postalCode = createLocationDto.postalCode;
     location.user = user;
+    location.latitude = createLocationDto.latitude;
+    location.longitude = createLocationDto.longitude;
     return await this.locationRepository.save(location);
   }
 
 
   async findOne(id: number) {
-    return await this.locationRepository.findOne(id);
+    const location = await this.locationRepository.findOne(id, { relations: ['user']}); 
+    return location;
+  }
+
+  async findByCoordinates(neLat: number, neLong: number, swLat: number, swLong: number) {    
+    const results: LocationModel[] = await this.locationRepository
+    .createQueryBuilder('location')
+    .innerJoinAndSelect('location.user', 'user')
+    .where('latitude > :swLat', { swLat })
+    .andWhere('latitude < :neLat', { neLat })
+    .andWhere('longitude > :swLong', { swLong })
+    .andWhere('longitude < :neLong', { neLong })
+    .getMany();
+    return results;
   }
 
   async findByUser(idUser: number){

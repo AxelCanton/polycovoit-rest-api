@@ -21,5 +21,10 @@ export class CreateLocationDto {
     @ApiProperty()
     @IsNumber()
     @IsNotEmpty()
-    userId: number;
+    latitude: number;
+
+    @ApiProperty()
+    @IsNumber()
+    @IsNotEmpty()
+    longitude: number;
 }
