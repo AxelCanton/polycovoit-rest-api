@@ -1,7 +1,8 @@
 import { LocationModel } from "../../location/entities/location.entity";
 import { Reservation } from "../../reservation/entities/reservation.entity";
-import { Column, Entity, PrimaryGeneratedColumn, Unique, OneToMany } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, Unique, OneToMany, ManyToOne } from "typeorm";
 import { Exclude } from 'class-transformer';
+import { Speciality } from "src/speciality/entities/speciality.entity";
 
 export const UNIQUE_MAIL = 'UNIQUE_MAIL'
 
@@ -44,4 +45,7 @@ export class User {
 
     @OneToMany(() => Reservation, reservation => reservation.receivingUser)
     receivedReservations: Reservation[];
+
+    @ManyToOne(() => Speciality)
+    speciality: Speciality;
 }

@@ -12,7 +12,10 @@ export class Reservation {
     message: string;
 
     @Column()
-    accepted: boolean;
+    accepted: number;
+
+    @Column()
+    date: Date;
 
     @ManyToOne(() => User, user => user.askedReservations)
     askingUser: User;
