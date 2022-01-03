@@ -6,11 +6,6 @@ export class CreateLocationDto {
     @ApiProperty()
     @IsString()
     @IsNotEmpty()
-    address: string;
-
-    @ApiProperty()
-    @IsString()
-    @IsNotEmpty()
     city: string;
 
     @ApiProperty()
