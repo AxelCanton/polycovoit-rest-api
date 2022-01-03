@@ -23,7 +23,10 @@ export class ReservationService {
     try{
       const reservation: Reservation = new Reservation();
       const location: LocationModel = await this.locationRepository.findOne(createReservationDto.locationId);
-      reservation.accepted = false;
+      
+      //Reservation.accepted is set to 0 when unanswered, 1 of accepted and -1 if rejected.
+      
+      reservation.accepted = 0;
       reservation.message = createReservationDto.message;
       reservation.askingUser = await this.userRepository.findOne(idAskingUser);
       reservation.receivingUser = location.user;
@@ -46,6 +49,19 @@ export class ReservationService {
     } else {
       throw new NotFoundException(`Reservation ${id} does not exist`)
     }
+  }
+
+  async findForUser(userId: number){
+    const user = await this.userRepository.findOne(userId);
+
+    return await this.reservationRepository.find({receivingUser: user});
+  }
+
+  async findByUser(userId: number){
+    const user = await this.userRepository.findOne(userId);
+
+    return  await this.reservationRepository.find({askingUser: user});
+
   }
 
   async update(id: number, updateReservationDto: UpdateReservationDto) {
