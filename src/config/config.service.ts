@@ -2,6 +2,7 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { Reservation } from '../reservation/entities/reservation.entity';
 import { LocationModel } from '../location/entities/location.entity';
 import { User } from '../user/entities/user.entity';
+import { Speciality } from 'src/speciality/entities/speciality.entity';
 
 require('dotenv').config();
 
@@ -41,7 +42,7 @@ class ConfigService {
       password: this.getValue('POSTGRES_PASSWORD'),
       database: this.getValue('POSTGRES_DATABASE'),
       synchronize: (process.env.RUN_MIGRATIONS ==="true"),
-      entities: [User, LocationModel, Reservation],
+      entities: [User, LocationModel, Reservation, Speciality],
       ssl: this.isProduction(),
     };
   }

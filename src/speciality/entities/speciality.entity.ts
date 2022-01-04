@@ -1,6 +1,7 @@
 import { User } from "src/user/entities/user.entity";
-import { OneToMany, PrimaryColumn } from "typeorm";
+import { Entity, OneToMany, PrimaryColumn } from "typeorm";
 
+@Entity()
 export class Speciality {
 
     @PrimaryColumn()
