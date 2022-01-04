@@ -18,8 +18,7 @@ const isNumeric = (value: string) => {
 }
 
 @ApiTags('Location')
-//@Role(RoleEnum.User)
-@Public()
+@Role(RoleEnum.User)
 @Controller('location')
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
@@ -28,11 +27,10 @@ export class LocationController {
   @ApiCreatedResponse({description: 'The location was successfully created.'})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
   @ApiBadRequestResponse({description:"Bad parameters, location not created."})
-  async create(@Req() request) {
-    const body: CreateLocationDto = request.body;
+  async create(@Body() createLocationDto: CreateLocationDto, @Req() request) {
     const user: User = request.user;
     
-    const newLocation = await this.locationService.create(body, user.id);
+    const newLocation = await this.locationService.create(createLocationDto, user.id);
     return newLocation;
   }
 

@@ -9,8 +9,7 @@ import { PrivateReservation } from './dto/private-reservation.dto';
 import { Public } from 'src/utils/roles/public.decorator';
 
 @ApiTags('Reservation')
-//@Role(RoleEnum.User)
-@Public()
+@Role(RoleEnum.User)
 @Controller('reservation')
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}

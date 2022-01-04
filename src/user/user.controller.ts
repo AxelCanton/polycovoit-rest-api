@@ -8,8 +8,7 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import { UserService } from "./user.service";
 
 @ApiTags('User')
-//@Role(RoleEnum.User)
-@Public()
+@Role(RoleEnum.User)
 @Controller('user')
 export class UserController{
 

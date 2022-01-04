@@ -8,8 +8,7 @@ import { Role } from 'src/utils/roles/roles.decorator';
 import { RoleEnum } from 'src/utils/roles/role.enum';
 
 @ApiTags('Speciality')
-//@Role(RoleEnum.User)
-@Public()
+@Role(RoleEnum.User)
 @Controller('speciality')
 export class SpecialityController {
   constructor(private readonly specialityService: SpecialityService) {}
