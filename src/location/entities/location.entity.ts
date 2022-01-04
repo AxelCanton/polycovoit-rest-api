@@ -7,9 +7,6 @@ export class LocationModel {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column("text")
-    address: String;
-
     @Column()
     postalCode: number;
 
