@@ -1,26 +1,52 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateSpecialityDto } from './dto/create-speciality.dto';
 import { UpdateSpecialityDto } from './dto/update-speciality.dto';
+import { Speciality } from './entities/speciality.entity';
 
 @Injectable()
 export class SpecialityService {
-  create(createSpecialityDto: CreateSpecialityDto) {
-    return 'This action adds a new speciality';
+
+  constructor(
+    @InjectRepository(Speciality)
+    private specialityRepository: Repository<Speciality>
+  ){}
+
+  async create(createSpecialityDto: CreateSpecialityDto) {
+    
+    try{ 
+      const speciality: Speciality = new Speciality();
+      speciality.specialityName = createSpecialityDto.specialityName;
+
+      return await this.specialityRepository.save(speciality)
+    } catch (error) {
+      throw new InternalServerErrorException('Unable to create new user')
+    }
   }
 
-  findAll() {
-    return `This action returns all speciality`;
+  async findAll() {
+    return await this.specialityRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} speciality`;
+  async findOne(name: string) {
+    return await this.specialityRepository.findOne(name);
   }
 
-  update(id: number, updateSpecialityDto: UpdateSpecialityDto) {
-    return `This action updates a #${id} speciality`;
+  async update(name: string, updateSpecialityDto: UpdateSpecialityDto) {
+    try {
+      this.specialityRepository.update(name, updateSpecialityDto)
+      return await this.specialityRepository.findOne(name)
+    } catch (error) {
+      throw new InternalServerErrorException()
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} speciality`;
+  async remove(name: string) {
+    const result =  await this.specialityRepository.delete(name);
+
+    if(result.affected === 0){
+      throw new NotFoundException()
+  }
   }
 }

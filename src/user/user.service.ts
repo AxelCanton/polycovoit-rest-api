@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { SpecialityService } from "src/speciality/speciality.service";
 import { isConstraint } from "src/utils";
 import { Repository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -13,16 +14,30 @@ export class UserService{
     constructor(
         @InjectRepository(User)
         private userRepository: Repository<User>,
-        private passwordService: PasswordService,
+        private passwordService: PasswordService
     ){}
 
     async findAll(){
-        const users = await this.userRepository.find();
-        return users;
+        return await this.userRepository.find({
+            join: {
+                alias: "user",
+                leftJoinAndSelect:{
+                    speciality: "user.speciality"
+                } 
+            }
+        });
+
     }
 
     async findOne(id: number){
-        const user = await this.userRepository.findOne(id);
+        const user = await this.userRepository.findOne(id, {
+            join: {
+                alias: "user",
+                leftJoinAndSelect:{
+                    speciality: "user.speciality"
+                } 
+            }
+        });
 
         if(user){
             return user;
@@ -34,6 +49,13 @@ export class UserService{
     async findByMail(email: string){
         const user: User = await this.userRepository.findOne({
             email: email
+        },{
+            join: {
+                alias: "user",
+                leftJoinAndSelect:{
+                    speciality: "user.speciality"
+                } 
+            }
         });
 
         if(user){
@@ -41,6 +63,20 @@ export class UserService{
         } else {
             throw new NotFoundException(`User ${email} does not exist`);
         }
+    }
+
+    async findForSpeciality(specialityName: String){
+        return await this.userRepository.find({
+            where: { 
+                speciality: specialityName
+            },
+            join: {
+                alias: "user",
+                leftJoinAndSelect:{
+                    speciality: "user.speciality"
+                } 
+            }
+        });
     }
 
     async create(createUserDto: CreateUserDto){
@@ -52,6 +88,7 @@ export class UserService{
             user.password = await this.passwordService.hashPassword(createUserDto.password);
             user.isAdmin = false;
             user.gender = createUserDto.gender;
+            user.speciality = createUserDto.speciality;
             return await this.userRepository.save(user);
         } catch (error) {
             if(isConstraint(error,UNIQUE_MAIL)){

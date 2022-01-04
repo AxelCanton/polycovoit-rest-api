@@ -8,7 +8,8 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import { UserService } from "./user.service";
 
 @ApiTags('User')
-@Role(RoleEnum.User)
+//@Role(RoleEnum.User)
+@Public()
 @Controller('user')
 export class UserController{
 
@@ -38,6 +39,14 @@ export class UserController{
     @ApiUnauthorizedResponse({description:"You are not authorized"})
     async findOne(@Param('id') id: string){
         return await this.userService.findOne(+id);
+    }
+
+    @Get('/speciality/:name')
+    @ApiOkResponse({description:"All the users from the speciality"})
+    @ApiNotFoundResponse({description:"Speciality not found"})
+    @ApiUnauthorizedResponse({description:"You are not authorized"})
+    async findForSpeciality(@Param('name') name: string){
+        return await this.userService.findForSpeciality(name);
     }
 
     @Patch(':id')

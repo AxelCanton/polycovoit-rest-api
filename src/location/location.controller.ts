@@ -9,6 +9,7 @@ import { Role } from 'src/utils/roles/roles.decorator';
 import { PrivateLocationDto } from './dto/private-location.dto';
 import { Req } from '@nestjs/common';
 import { User } from 'src/user/entities/user.entity';
+import { Public } from 'src/utils/roles/public.decorator';
 
 const isNumeric = (value: string) => {
   // Valid number examples : .234, 2938, 123.293
@@ -17,7 +18,8 @@ const isNumeric = (value: string) => {
 }
 
 @ApiTags('Location')
-@Role(RoleEnum.User)
+//@Role(RoleEnum.User)
+@Public()
 @Controller('location')
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}

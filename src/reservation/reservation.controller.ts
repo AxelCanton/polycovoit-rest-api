@@ -6,9 +6,11 @@ import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkRe
 import { RoleEnum } from 'src/utils/roles/role.enum';
 import { Role } from 'src/utils/roles/roles.decorator';
 import { PrivateReservation } from './dto/private-reservation.dto';
+import { Public } from 'src/utils/roles/public.decorator';
 
 @ApiTags('Reservation')
-@Role(RoleEnum.User)
+//@Role(RoleEnum.User)
+@Public()
 @Controller('reservation')
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
