@@ -30,14 +30,7 @@ export class UserService{
     }
 
     async findOne(id: number){
-        const user = await this.userRepository.findOne(id, {
-            join: {
-                alias: "user",
-                leftJoinAndSelect:{
-                    speciality: "user.speciality"
-                } 
-            }
-        });
+        const user = await this.userRepository.findOne(id, { relations: ['speciality', 'locations']});
 
         if(user){
             return user;
