@@ -22,7 +22,7 @@ export class ReservationService {
   async create(createReservationDto: CreateReservationDto, idAskingUser: number) {
     try{
       const reservation: Reservation = new Reservation();
-      const location: LocationModel = await this.locationRepository.findOne(createReservationDto.locationId);
+      const location: LocationModel = await this.locationRepository.findOne(createReservationDto.locationId, {relations:["user"]});
       
       //Reservation.accepted is set to 0 when unanswered, 1 of accepted and -1 if rejected.
       
@@ -31,6 +31,7 @@ export class ReservationService {
       reservation.askingUser = await this.userRepository.findOne(idAskingUser);
       reservation.receivingUser = location.user;
       reservation.location = location;
+      reservation.date = createReservationDto.date;
       return await this.reservationRepository.save(reservation);
     } catch (error) {
       throw new InternalServerErrorException('Unable to create new reservation')
@@ -54,19 +55,27 @@ export class ReservationService {
   async findForUser(userId: number){
     const user = await this.userRepository.findOne(userId);
 
-    return await this.reservationRepository.find({receivingUser: user});
+    return await this.reservationRepository.find({
+      where: {receivingUser: user},
+      relations: ["location","askingUser","receivingUser"]});
   }
 
   async findByUser(userId: number){
     const user = await this.userRepository.findOne(userId);
 
-    return  await this.reservationRepository.find({askingUser: user});
+    return  await this.reservationRepository.find({
+      where:{
+        askingUser: user
+      },
+      relations: ["location","askingUser","receivingUser"]
+    });
 
   }
 
   async update(id: number, updateReservationDto: UpdateReservationDto) {
     
     try {
+      console.log("id : ", id, " updateReservationDto : ", updateReservationDto.accepted)
       await this.reservationRepository.update(id, updateReservationDto);
       return this.findOne(id);
     } catch (error) {

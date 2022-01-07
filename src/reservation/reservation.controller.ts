@@ -19,10 +19,11 @@ export class ReservationController {
   @ApiBadRequestResponse({description:"Bad parameters, reservation not created"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
   async create(@Body() createReservationDto: CreateReservationDto, @Req() req) {
-    return await this.reservationService.create(createReservationDto,req.user.id);
+    return (await this.reservationService.create(createReservationDto,req.user.id)).id;
   }
 
   @Get()
+  @Public()
   @ApiOkResponse({description:"All the existing reservations"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
   async findAll() {
@@ -32,32 +33,66 @@ export class ReservationController {
   @ApiOkResponse({description:"The reservations asked to the connected user"})
   @ApiUnauthorizedResponse({description:"You are not authorized or not connected as a user"})
   async findForUser(@Req() req){
-    return await this.reservationService.findForUser(req.user.id);
+    const reservations = await this.reservationService.findForUser(req.user.id);
+    
+    const resToReturn = [];
+
+    for (const reservation of reservations){
+      const res : PrivateReservation = {
+        id: reservation.id,
+        postalCode: reservation.location.postalCode,
+        message: reservation.message,
+        accepted: reservation.accepted,
+        date: reservation.date,
+        askingUser: {
+          id: reservation.askingUser.id,
+          firstName: reservation.askingUser.firstName,
+          lastName: reservation.askingUser.lastName,
+          email: reservation.askingUser.email,
+          gender: reservation.askingUser.gender,
+          speciality: reservation.askingUser.speciality,
+        }
+      }
+      resToReturn.push(res);
+    }
+
+    return resToReturn;
   }
 
   @Get('/by-user')
   @ApiOkResponse({description:"The reservations made by the connected user"})
   @ApiUnauthorizedResponse({description:"You are not authorized or not connected as a user"})
   async findByUser(@Req() req){
+    console.log(req.user.id)
     const reservations =  await this.reservationService.findByUser(req.user.id);
-
+    console.log(reservations)
     const resToReturn = [];
 
     for (const reservation of reservations){
-      if (reservation.accepted !== 1){
-        const res : PrivateReservation = {
-          id: reservation.id,
-          postalCode: reservation.location.postalCode,
-          message: reservation.message,
-          accepted: reservation.accepted,
-          date: reservation.date,
-          askingUser: reservation.askingUser,
-          receivingUserGender: "A impl"
+      const res : PrivateReservation = {
+        id: reservation.id,
+        postalCode: reservation.location.postalCode,
+        message: reservation.message,
+        accepted: reservation.accepted,
+        date: reservation.date,
+        receivingUser: {
+          id: reservation.askingUser.id,
+          gender: reservation.askingUser.gender,
+          speciality: reservation.askingUser.speciality,
         }
-
+      }
+      if (reservation.accepted !== 1){
         resToReturn.push(res);
       } else {
-        resToReturn.push(reservation);
+        res.receivingUser = {
+          id: reservation.askingUser.id,
+          firstName: reservation.askingUser.firstName,
+          lastName: reservation.askingUser.lastName,
+          email: reservation.askingUser.email,
+          gender: reservation.askingUser.gender,
+          speciality: reservation.askingUser.speciality,
+        }
+        resToReturn.push(res);
       }
     }
 
@@ -75,10 +110,14 @@ export class ReservationController {
 
 
   @Patch(':id')
+  @Public()
   @ApiCreatedResponse({description:"The reservation has been modified"})
   @ApiNotFoundResponse({description:"Reservation not found"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
-  async update(@Param('id') id: string, @Body() updateReservationDto: UpdateReservationDto) {
+  async update(@Body() updateReservationDto: any, @Param('id') id: string) {
+    
+    //Erreur quand typage updateReservationDto
+
     return await this.reservationService.update(+id, updateReservationDto);
   }
 

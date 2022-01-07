@@ -1,4 +1,4 @@
-import { User } from "src/user/entities/user.entity";
+import { PrivateUserDto } from "src/user/dto/private-user.dto";
 
 export class PrivateReservation{
     id: number;
@@ -6,6 +6,6 @@ export class PrivateReservation{
     message: string;
     accepted: number;
     date: Date;
-    askingUser: User;
-    receivingUserGender: string;
+    askingUser?: PrivateUserDto;
+    receivingUser?: PrivateUserDto;
   }

@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString, IsBoolean, IsNumber } from "class-validator";
+import { IsNotEmpty, IsString, IsBoolean, IsNumber, IsDate } from "class-validator";
 
 export class CreateReservationDto {
     @ApiProperty()
@@ -8,8 +8,11 @@ export class CreateReservationDto {
     message: string;
 
     @ApiProperty()
-    @IsBoolean()
     @IsNumber()
     @IsNotEmpty()
     locationId: number;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    date: Date;
 }
