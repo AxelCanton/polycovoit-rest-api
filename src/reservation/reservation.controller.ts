@@ -114,10 +114,8 @@ export class ReservationController {
   @ApiCreatedResponse({description:"The reservation has been modified"})
   @ApiNotFoundResponse({description:"Reservation not found"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
-  async update(@Body() updateReservationDto: any, @Param('id') id: string) {
+  async update(@Body() updateReservationDto: UpdateReservationDto, @Param('id') id: string) {
     
-    //Erreur quand typage updateReservationDto
-
     return await this.reservationService.update(+id, updateReservationDto);
   }
 
