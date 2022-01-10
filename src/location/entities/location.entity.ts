@@ -1,6 +1,5 @@
 import { User } from "src/user/entities/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Transform } from 'class-transformer';
 
 @Entity("location")
 export class LocationModel {
@@ -11,7 +10,7 @@ export class LocationModel {
     postalCode: number;
 
     @Column()
-    city: String;
+    city: string;
 
     @Column('real')
     latitude: number;

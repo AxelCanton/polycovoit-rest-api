@@ -39,6 +39,7 @@ export class LocationService {
     const results: LocationModel[] = await this.locationRepository
     .createQueryBuilder('location')
     .innerJoinAndSelect('location.user', 'user')
+    .innerJoinAndSelect('user.speciality', 'speciality')
     .where('latitude > :swLat', { swLat })
     .andWhere('latitude < :neLat', { neLat })
     .andWhere('longitude > :swLong', { swLong })

@@ -57,7 +57,7 @@ export class ReservationService {
 
     return await this.reservationRepository.find({
       where: {receivingUser: user},
-      relations: ["location","askingUser","receivingUser"]});
+      relations: ["location","askingUser","receivingUser", "speciality"]});
   }
 
   async findByUser(userId: number){
@@ -67,9 +67,8 @@ export class ReservationService {
       where:{
         askingUser: user
       },
-      relations: ["location","askingUser","receivingUser"]
+      relations: ["location","askingUser","receivingUser", "askingUser.speciality", "receivingUser.speciality"]
     });
-
   }
 
   async update(id: number, updateReservationDto: UpdateReservationDto) {

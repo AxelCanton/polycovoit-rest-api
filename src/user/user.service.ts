@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { Speciality } from "src/speciality/entities/speciality.entity";
 import { SpecialityService } from "src/speciality/speciality.service";
 import { isConstraint } from "src/utils";
 import { Repository } from "typeorm";
@@ -8,14 +9,31 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import { UNIQUE_MAIL, User } from "./entities/user.entity";
 import { PasswordService } from "./password.service";
 
+
+
 @Injectable()
 export class UserService{
     
     constructor(
         @InjectRepository(User)
         private userRepository: Repository<User>,
+        @InjectRepository(Speciality)
+        private specialityRepository: Repository<Speciality>,
         private passwordService: PasswordService
     ){}
+
+    async dtoToUserEntity (dto: CreateUserDto | UpdateUserDto) {
+        const user = new User();
+        user.firstName = dto.firstName;
+        user.lastName = dto.lastName;
+        user.email = dto.email;
+        user.password = dto.password ? await this.passwordService.hashPassword(dto.password) : undefined;
+        user.isAdmin = false;
+        user.gender = dto.gender;
+        user.speciality = dto.speciality ? await this.specialityRepository.findOne(dto.speciality) : undefined;
+
+        return user;
+    }
 
     async findAll(){
         return await this.userRepository.find({
@@ -74,14 +92,7 @@ export class UserService{
 
     async create(createUserDto: CreateUserDto){
         try {
-            const user: User = new User();
-            user.firstName = createUserDto.firstName;
-            user.lastName = createUserDto.lastName;
-            user.email = createUserDto.email;
-            user.password = await this.passwordService.hashPassword(createUserDto.password);
-            user.isAdmin = false;
-            user.gender = createUserDto.gender;
-            user.speciality = createUserDto.speciality;
+            const user = await this.dtoToUserEntity(createUserDto);
             return await this.userRepository.save(user);
         } catch (error) {
             if(isConstraint(error,UNIQUE_MAIL)){
@@ -93,13 +104,9 @@ export class UserService{
     }
 
     async update(updateUserDto: UpdateUserDto, id: number){
- 
-        if(updateUserDto.password){
-            updateUserDto.password = await this.passwordService.hashPassword(updateUserDto.password);
-        }
-
+        const userEntity = await this.dtoToUserEntity(updateUserDto);
         try {
-            await this.userRepository.update(id, updateUserDto);
+            await this.userRepository.update(id, userEntity);
             const user = await this.findOne(id);
             return user;
         } catch (error) {
