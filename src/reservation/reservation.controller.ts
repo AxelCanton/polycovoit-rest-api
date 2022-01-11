@@ -50,7 +50,7 @@ export class ReservationController {
           lastName: reservation.askingUser.lastName,
           email: reservation.askingUser.email,
           gender: reservation.askingUser.gender,
-          speciality: reservation.askingUser.speciality,
+          speciality: reservation.askingUser.speciality.specialityName,
         }
       }
       resToReturn.push(res);
@@ -63,9 +63,7 @@ export class ReservationController {
   @ApiOkResponse({description:"The reservations made by the connected user"})
   @ApiUnauthorizedResponse({description:"You are not authorized or not connected as a user"})
   async findByUser(@Req() req){
-    console.log(req.user.id)
     const reservations =  await this.reservationService.findByUser(req.user.id);
-    console.log(reservations)
     const resToReturn = [];
 
     for (const reservation of reservations){
@@ -78,7 +76,7 @@ export class ReservationController {
         receivingUser: {
           id: reservation.askingUser.id,
           gender: reservation.askingUser.gender,
-          speciality: reservation.askingUser.speciality,
+          speciality: reservation.askingUser.speciality.specialityName,
         }
       }
       if (reservation.accepted !== 1){
@@ -90,7 +88,7 @@ export class ReservationController {
           lastName: reservation.askingUser.lastName,
           email: reservation.askingUser.email,
           gender: reservation.askingUser.gender,
-          speciality: reservation.askingUser.speciality,
+          speciality: reservation.askingUser.speciality.specialityName,
         }
         resToReturn.push(res);
       }

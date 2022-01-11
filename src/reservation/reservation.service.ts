@@ -69,7 +69,6 @@ export class ReservationService {
       },
       relations: ["location","askingUser","receivingUser","askingUser.speciality", "receivingUser.speciality"]
     });
-
   }
 
   async update(id: number, updateReservationDto: UpdateReservationDto) {

@@ -46,6 +46,7 @@ export class User {
     @OneToMany(() => Reservation, reservation => reservation.receivingUser)
     receivedReservations: Reservation[];
 
+    // Should be Speciality entity if it was implemented
     @ManyToOne(() => Speciality, speciality => speciality.specialityName)
-    speciality: string;
+    speciality: Speciality;
 }
