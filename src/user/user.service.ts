@@ -24,13 +24,23 @@ export class UserService{
 
     async dtoToUserEntity (dto: CreateUserDto | UpdateUserDto) {
         const user = new User();
+        const speciality: string | undefined = dto.speciality;
+        let specialityObject: Speciality | undefined = undefined;
+        if (speciality) {
+            const specialityFound = await this.specialityRepository.findOne(speciality);
+            if (specialityFound) {
+                specialityObject = specialityFound;
+            } else {
+                throw new NotFoundException('Speciality not found');
+            }
+        }
         user.firstName = dto.firstName;
         user.lastName = dto.lastName;
         user.email = dto.email;
         user.password = dto.password ? await this.passwordService.hashPassword(dto.password) : undefined;
         user.isAdmin = false;
         user.gender = dto.gender;
-        user.speciality = dto.speciality ? await this.specialityRepository.findOne(dto.speciality) : undefined;
+        user.speciality = specialityObject;
 
         return user;
     }
@@ -91,8 +101,8 @@ export class UserService{
     }
 
     async create(createUserDto: CreateUserDto){
+        const user = await this.dtoToUserEntity(createUserDto);
         try {
-            const user = await this.dtoToUserEntity(createUserDto);
             return await this.userRepository.save(user);
         } catch (error) {
             if(isConstraint(error,UNIQUE_MAIL)){
