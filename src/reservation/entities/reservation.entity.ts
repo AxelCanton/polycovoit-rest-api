@@ -17,12 +17,21 @@ export class Reservation {
     @Column()
     date: Date;
 
-    @ManyToOne(() => User, user => user.askedReservations)
+    @ManyToOne(() => User, user => user.askedReservations, {
+        nullable: false,
+        onDelete: "CASCADE"
+    })
     askingUser: User;
 
-    @ManyToOne(() => User, user => user.receivedReservations)
+    @ManyToOne(() => User, user => user.receivedReservations, {
+        nullable: false,
+        onDelete: "CASCADE"
+    })
     receivingUser: User;
 
-    @ManyToOne(() => LocationModel)
+    @ManyToOne(() => LocationModel, {
+        nullable: false,
+        onDelete: "CASCADE"
+    })
     location: LocationModel;
 }
