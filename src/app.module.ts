@@ -6,6 +6,7 @@ import { ReservationModule } from './reservation/reservation.module';
 import { AuthModule } from './auth/auth.module';
 import { configService } from './config/config.service';
 import { SpecialityModule } from './speciality/speciality.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { SpecialityModule } from './speciality/speciality.module';
     LocationModule,
     ReservationModule,
     AuthModule,
-    SpecialityModule
+    SpecialityModule,
+    MailModule
   ],
   controllers: [],
   providers: [],
