@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, ValidationPipe } from '@nestjs/common';
 import { LocationService } from './location.service';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
@@ -35,7 +35,7 @@ export class LocationController {
   }
 
   @Get()
-  async findByCoordinates(@Query('ne_lat') ne_lat: string, @Query('ne_long') ne_long: string, @Query('sw_lat') sw_lat: string, @Query('sw_long') sw_long: string, ): Promise<PrivateLocationDto[]> {
+  async findByCoordinates(@Query('ne_lat') ne_lat: string, @Query('ne_long') ne_long: string, @Query('sw_lat') sw_lat: string, @Query('sw_long') sw_long: string, @Query('specialities') specialities: string[]): Promise<PrivateLocationDto[]> {
     const isValidQueryParams = isNumeric(ne_lat) && isNumeric(ne_long) && isNumeric(sw_lat) && isNumeric(sw_long);
     if(!isValidQueryParams) {
       throw new BadRequestException('Invalid coordinates');
@@ -44,7 +44,7 @@ export class LocationController {
     const neLong = parseFloat(ne_long);
     const swLat = parseFloat(sw_lat);
     const swLong = parseFloat(sw_long);
-    const locations = await this.locationService.findByCoordinates(neLat, neLong, swLat, swLong);
+    const locations = await this.locationService.findByCoordinates(neLat, neLong, swLat, swLong, specialities);
 
     // We don't want to expose the address and the user whom they belong to.
     const privateLocations = locations.map((location) => new PrivateLocationDto(location.id, location.postalCode, location.city, location.latitude, location.longitude, location.user.gender, location.user.speciality.specialityName));

@@ -35,15 +35,16 @@ export class LocationService {
     return location;
   }
 
-  async findByCoordinates(neLat: number, neLong: number, swLat: number, swLong: number) {    
+  async findByCoordinates(neLat: number, neLong: number, swLat: number, swLong: number, specialities: string[]) {
     const results: LocationModel[] = await this.locationRepository
     .createQueryBuilder('location')
     .innerJoinAndSelect('location.user', 'user')
     .innerJoinAndSelect('user.speciality', 'speciality')
-    .where('latitude > :swLat', { swLat })
+    .andWhere('latitude > :swLat', { swLat })
     .andWhere('latitude < :neLat', { neLat })
     .andWhere('longitude > :swLong', { swLong })
     .andWhere('longitude < :neLong', { neLong })
+    .andWhere('speciality.specialityName IN (:...specialities)', { specialities })
     .getMany();
     return results;
   }
