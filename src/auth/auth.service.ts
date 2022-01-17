@@ -4,6 +4,8 @@ import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/user/entities/user.entity';
 
+import * as ldap from 'ldapjs';
+
 @Injectable()
 export class AuthService {
 
@@ -13,16 +15,107 @@ export class AuthService {
         private jwtService: JwtService
     ){}
 
-    async validateUser(email: string, password: string): Promise<User | null>{
-        const user: User = await this.userService.findByMail(email);
-        if(user){
-            const validPassword: boolean = await this.passwordService.checkPassword(password, user.password);
-            if(validPassword){
-                return user;
+    public async validateUser(username: string, password: string) {
+        
+        let bind: any = await this.handleBind({
+            username: username,
+            password: password
+        });
+        if (bind.success === true) {
+            const search: any = await this.handleSearch({
+                username: username,
+                password: password
+            })
+            const user = search.user
+            if (user) {
+                return {
+                    username: username,
+                    department: user.department,
+                    mail: user.mail
+                };
             }
         }
-        return null;    
     }
+
+    private async handleBind(req: any) {
+        let ldapClient = ldap.createClient({
+            url: 'ldap://ldap.polytech.univ-montp2.fr'
+        });
+         let bind: any = await new Promise((resolve) => {
+            ldapClient.bind(`${req.username}@isim.intra`, req.password, (err) => {
+                if (err) {
+                    return resolve({
+                        success: false
+                    })
+                }
+                return resolve({
+                    success: true
+                })
+            })
+        });
+        if (bind.success) ldapClient.unbind()
+        ldapClient.destroy()
+        return bind
+
+    }
+
+    private async handleSearch(req: any) {
+        let ldapClient = ldap.createClient({
+            url: 'ldap://ldap.polytech.univ-montp2.fr',
+            bindDN: `${req.username}@isim.intra`,
+            bindCredentials: req.password
+        })
+
+        const opts: ldap.SearchOptions = {
+            filter: `(|(cn=${req.username})(dn=${req.username}))`,
+            scope: 'sub',
+            attributes: ["cn", 'department', 'mail']
+        };
+
+        let ret = await new Promise((resolve) => {
+            ldapClient.search(' OU=Etudiants, OU=Comptes,DC=isim, DC=intra', opts, (err, res) => {
+                if (err) {
+                    return resolve({
+                        user: null,
+                        msg: `error on connection : ${err}`
+                    })
+                } else {
+                    res.on('searchEntry', function (entry) {
+                        return resolve({
+                            user: entry.object,
+                            msg: "ok"
+                        })
+                    });
+                    res.on('error', function (err) {
+                        return resolve({
+                            user: null,
+                            msg: `error on search : ${err}`
+                        })
+                    });
+                    res.on('end', function (result) {
+                        return resolve({
+                            user: null,
+                            msg: `function ended : ${result}`
+                        })
+                    });
+                }
+            })
+        })
+
+        ldapClient.destroy()
+        return ret
+    }
+
+    // async validateUser(email: string, password: string): Promise<User | null>{
+    //     const user: User = await this.userService.findByMail(email);
+    //     if(user){
+    //         const validPassword: boolean = await this.passwordService.checkPassword(password, user.password);
+    //         if(validPassword){
+    //             return user;
+    //         }
+    //     }
+    //     return null;    
+    // }
 
     async login(user: any){
         const accessTokenPayload = {
