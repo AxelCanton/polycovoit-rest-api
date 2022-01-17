@@ -37,6 +37,11 @@ export class User {
     @Column()
     isAdmin: boolean;
 
+    @Column({
+        nullable: true,
+    })
+    expiryDate: Date;
+
     @OneToMany(() => LocationModel, location => location.user)
     locations: LocationModel[];
 

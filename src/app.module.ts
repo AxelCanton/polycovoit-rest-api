@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
-import { LocationModule} from './location/location.module'
+import { LocationModule } from './location/location.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { AuthModule } from './auth/auth.module';
 import { configService } from './config/config.service';
 import { SpecialityModule } from './speciality/speciality.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -14,7 +16,9 @@ import { SpecialityModule } from './speciality/speciality.module';
     LocationModule,
     ReservationModule,
     AuthModule,
-    SpecialityModule
+    ScheduleModule.forRoot(),
+    SpecialityModule,
+    TaskModule,
   ],
   controllers: [],
   providers: [],

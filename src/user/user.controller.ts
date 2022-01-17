@@ -61,7 +61,7 @@ export class UserController{
     @ApiNotFoundResponse({description:"User not found"})
     @ApiUnauthorizedResponse({description:"You are not authorized"})
     async delete(@Param('id') id: string){
-        return await this.userService.delete(+id);
+        return await this.userService.setExpiry(+id);
     }
 
 }

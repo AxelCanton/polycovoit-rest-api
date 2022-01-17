@@ -1,9 +1,9 @@
+/* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Speciality } from "src/speciality/entities/speciality.entity";
-import { SpecialityService } from "src/speciality/speciality.service";
 import { isConstraint } from "src/utils";
-import { Repository } from "typeorm";
+import { LessThanOrEqual, Repository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { UNIQUE_MAIL, User } from "./entities/user.entity";
@@ -86,7 +86,7 @@ export class UserService{
         }
     }
 
-    async findForSpeciality(specialityName: String){
+    async findForSpeciality(specialityName: string){
         return await this.userRepository.find({
             where: { 
                 speciality: specialityName
@@ -147,12 +147,28 @@ export class UserService{
         }
     }
 
-    async delete(id: number){
+    async delete(id: number) {
         const result = await this.userRepository.delete(id);
 
         if(result.affected === 0){
             throw new NotFoundException()
         }
+    }
+
+    async setExpiry(id: number) {
+        // Expiry is 3 days after today
+        const expiry = new Date();
+        expiry.setMonth(expiry.getDate() + 3);
+
+        await this.userRepository.update(id, {
+            expiryDate: expiry
+        });
+    }
+
+    async deleteExpiredAccount() {
+        await this.userRepository.delete({
+            expiryDate: LessThanOrEqual(new Date())
+        });
     }
 
 };
