@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, ValidationPipe, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { LocationService } from './location.service';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
@@ -9,7 +9,6 @@ import { Role } from 'src/utils/roles/roles.decorator';
 import { PrivateLocationDto } from './dto/private-location.dto';
 import { Req } from '@nestjs/common';
 import { User } from 'src/user/entities/user.entity';
-import { Public } from 'src/utils/roles/public.decorator';
 
 const isNumeric = (value: string) => {
   // Valid number examples : .234, 2938, 123.293
@@ -29,7 +28,7 @@ export class LocationController {
   @ApiBadRequestResponse({description:"Bad parameters, location not created."})
   async create(@Body() createLocationDto: CreateLocationDto, @Req() request) {
     const user: User = request.user;
-    
+
     const newLocation = await this.locationService.create(createLocationDto, user.id);
     return newLocation;
   }
@@ -55,31 +54,8 @@ export class LocationController {
   @ApiOkResponse({description:"The location"})
   @ApiNotFoundResponse({description:"Location not found"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
-  async findOne(@Param('id') id: string) {
-    const location: LocationModel = await this.locationService.findOne(+id);
-    if (location === undefined) {
-      throw new NotFoundException("Location was not found");
-    }
-    return location;
-  }
-
-  @Get()
-  @ApiOkResponse({description:"All the locations for given user"})
-  @ApiUnauthorizedResponse({description:"You are not authorized"})
-  @ApiNotFoundResponse({description:"User not found"})
-  async findByUser(@Req() req) {
-    const user: User = req.user;
-    const userId = req.query.user;
-    
-    if(!userId || !Number.isInteger(userId)) {
-      throw new BadRequestException('You need to set the user query parameter');
-    }
-
-    if(!user.isAdmin && user.id != userId) {
-      throw new ForbiddenException();
-    }
-
-    const location = await this.locationService.findByUser(+userId);
+  async findOne(@Param('id') id: string, @Req() req) {
+    const location = await this.locationService.fetchLocationIfUserValid(req.user.id, +id);
     return location;
   }
 
@@ -87,15 +63,17 @@ export class LocationController {
   @ApiCreatedResponse({description:"The location has been modified"})
   @ApiNotFoundResponse({description:"Location not found"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
-  update(@Param('id') id: string, @Body() updateLocationDto: UpdateLocationDto) {
-    this.locationService.update(+id, updateLocationDto);
+  async update(@Param('id') id: string, @Body() updateLocationDto: UpdateLocationDto, @Req() req) {
+    await this.locationService.fetchLocationIfUserValid(req.user.id, +id);
+    await this.locationService.update(+id, updateLocationDto);
   }
 
   @Delete(':id')
   @ApiOkResponse({description:"The location has been deleted"})
   @ApiNotFoundResponse({description:"Location not found"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
-  remove(@Param('id') id: string) {
-    return this.locationService.remove(+id);
+  async remove(@Param('id') id: string, @Req() req) {
+    await this.locationService.fetchLocationIfUserValid(req.user.id, +id);
+    return await this.locationService.remove(+id);
   }
 }

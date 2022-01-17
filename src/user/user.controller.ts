@@ -1,5 +1,6 @@
+/* eslint-disable prettier/prettier */
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger";
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post,  Req } from "@nestjs/common";
 import { Public } from "src/utils/roles/public.decorator";
 import { RoleEnum } from "src/utils/roles/role.enum";
 import { Role } from "src/utils/roles/roles.decorator";
@@ -28,6 +29,7 @@ export class UserController{
     @Get()
     @ApiOkResponse({description:"All the existing users"})
     @ApiUnauthorizedResponse({description:"You are not authorized"})
+    @Role(RoleEnum.Admin)
     async findAll(){
         return await this.userService.findAll();
     }
@@ -36,23 +38,21 @@ export class UserController{
     @ApiOkResponse({description:"The user"})
     @ApiNotFoundResponse({description:"User not found"})
     @ApiUnauthorizedResponse({description:"You are not authorized"})
-    async findOne(@Param('id') id: string){
+    async findOne(@Param('id') id: string, @Req() req){
+        if (parseInt(id) !== req.user.id) {
+            throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+        }
         return await this.userService.findOne(+id);
-    }
-
-    @Get('/speciality/:name')
-    @ApiOkResponse({description:"All the users from the speciality"})
-    @ApiNotFoundResponse({description:"Speciality not found"})
-    @ApiUnauthorizedResponse({description:"You are not authorized"})
-    async findForSpeciality(@Param('name') name: string){
-        return await this.userService.findForSpeciality(name);
     }
 
     @Patch(':id')
     @ApiCreatedResponse({description:"The user has been modified"})
     @ApiNotFoundResponse({description:"User not found"})
     @ApiUnauthorizedResponse({description:"You are not authorized"})
-    async update(@Body() updateUserDto: UpdateUserDto, @Param('id') id: string){
+    async update(@Body() updateUserDto: UpdateUserDto, @Param('id') id: string, @Req() req){
+        if (parseInt(id) !== req.user.id) {
+            throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+        }
         return await this.userService.update(updateUserDto,+id);
     }
 
@@ -60,7 +60,10 @@ export class UserController{
     @ApiOkResponse({description:"The user has been deleted"})
     @ApiNotFoundResponse({description:"User not found"})
     @ApiUnauthorizedResponse({description:"You are not authorized"})
-    async delete(@Param('id') id: string){
+    async delete(@Param('id') id: string, @Req() req){
+        if (parseInt(id) !== req.user.id) {
+            throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+        }
         return await this.userService.setExpiry(+id);
     }
 

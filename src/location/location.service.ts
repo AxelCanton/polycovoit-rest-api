@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -29,7 +29,6 @@ export class LocationService {
     return await this.locationRepository.save(location);
   }
 
-
   async findOne(id: number) {
     const location = await this.locationRepository.findOne(id, { relations: ['user']}); 
     return location;
@@ -49,16 +48,23 @@ export class LocationService {
     return results;
   }
 
-  async findByUser(idUser: number){
-    const user: User = await this.userRepository.findOne(idUser);
-    return await this.locationRepository.find({user: user});
-  }
-
   async update(id: number, updateLocationDto: UpdateLocationDto) {
     await this.locationRepository.update(id, updateLocationDto);
   }
 
   async remove(id: number) {
     await this.locationRepository.delete(id);
+  }
+
+  async fetchLocationIfUserValid(idUser: number, idLocation: number): Promise<LocationModel> {
+    const location = await this.findOne(idLocation);
+    if (!location) {
+      throw new NotFoundException(`Location id ${idLocation} not found`);
+    }
+
+    if (location.user.id !== idUser) {
+      throw new ForbiddenException('Forbidden');
+    }
+    return location;
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LocationModel } from 'src/location/entities/location.entity';
 import { User } from 'src/user/entities/user.entity';
@@ -43,7 +43,7 @@ export class ReservationService {
   }
 
   async findOne(id: number) {
-    const reservation = await this.reservationRepository.findOne(id);
+    const reservation = await this.reservationRepository.findOne(id, { relations: ['askingUser', 'receivingUser'] });
 
     if(reservation){
       return reservation;
@@ -90,5 +90,17 @@ export class ReservationService {
     }
 
     return result;
+  }
+
+  async fetchIfUserValid(idUser: number, idReservation: number) {
+    const reservation = await this.findOne(idReservation);
+    if (!reservation) {
+      throw new NotFoundException(`Reservation id ${idReservation} not found`);
+    }
+
+    if (reservation.askingUser.id !== idUser && reservation.receivingUser.id !== idUser) {
+      throw new ForbiddenException('Forbidden');
+    }
+    return reservation;
   }
 }

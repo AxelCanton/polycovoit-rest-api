@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Header, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Header, Req, UseGuards } from '@nestjs/common';
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
@@ -26,6 +26,7 @@ export class ReservationController {
   @Public()
   @ApiOkResponse({description:"All the existing reservations"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
+  @Role(RoleEnum.Admin)
   async findAll() {
     return await this.reservationService.findAll();
   }
@@ -97,23 +98,13 @@ export class ReservationController {
     return resToReturn;
   }
 
-  @Get(':id')
-  @ApiOkResponse({description:"The reservation"})
-  @ApiNotFoundResponse({description:"Reservation not found"})
-  @ApiUnauthorizedResponse({description:"You are not authorized"})
-  async findOne(@Param('id') id: string) {
-    return await this.reservationService.findOne(+id);
-  }
-
-
-
   @Patch(':id')
   @Public()
   @ApiCreatedResponse({description:"The reservation has been modified"})
   @ApiNotFoundResponse({description:"Reservation not found"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
-  async update(@Body() updateReservationDto: UpdateReservationDto, @Param('id') id: string) {
-    
+  async update(@Body() updateReservationDto: UpdateReservationDto, @Param('id') id: string, @Req() req) {
+    await this.reservationService.fetchIfUserValid(req.user.id, +id);
     return await this.reservationService.update(+id, updateReservationDto);
   }
 
@@ -121,7 +112,8 @@ export class ReservationController {
   @ApiOkResponse({description:"The reservation has been deleted"})
   @ApiNotFoundResponse({description:"Reservation not found"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string, @Req() req) {
+    await this.reservationService.fetchIfUserValid(req.user.id, +id);
     return await this.reservationService.remove(+id);
   }
 }

@@ -86,20 +86,6 @@ export class UserService{
         }
     }
 
-    async findForSpeciality(specialityName: string){
-        return await this.userRepository.find({
-            where: { 
-                speciality: specialityName
-            },
-            join: {
-                alias: "user",
-                leftJoinAndSelect:{
-                    speciality: "user.speciality"
-                } 
-            }
-        });
-    }
-
     async create(createUserDto: CreateUserDto){
         const user = await this.dtoToUserEntity(createUserDto);
         try {
