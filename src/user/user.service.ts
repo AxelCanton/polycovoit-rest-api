@@ -5,6 +5,7 @@ import { Speciality } from "src/speciality/entities/speciality.entity";
 import { isConstraint } from "src/utils";
 import { LessThanOrEqual, Repository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
+import { LdapUserDto } from "./dto/ldap-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { UNIQUE_MAIL, User } from "./entities/user.entity";
 import { PasswordService } from "./password.service";
@@ -41,6 +42,8 @@ export class UserService{
         user.isAdmin = false;
         user.gender = dto.gender;
         user.speciality = specialityObject;
+        user.username = dto.username;
+        user.isValid = true;
 
         return user;
     }
@@ -67,9 +70,9 @@ export class UserService{
         }
     }
 
-    async findByMail(email: string){
+    async findByUsername(username: string){
         const user: User = await this.userRepository.findOne({
-            email: email
+            username: username
         },{
             join: {
                 alias: "user",
@@ -82,7 +85,57 @@ export class UserService{
         if(user){
             return user;
         } else {
-            throw new NotFoundException(`User ${email} does not exist`);
+            return null;
+        }
+    }
+
+    async findForSpeciality(specialityName: String){
+        return await this.userRepository.find({
+            where: { 
+                speciality: specialityName
+            },
+            join: {
+                alias: "user",
+                leftJoinAndSelect:{
+                    speciality: "user.speciality"
+                } 
+            }
+        });
+    }
+
+    async createLdapUser(ldapUserDto: LdapUserDto){
+
+        const speciality: string | undefined = ldapUserDto.speciality;
+        let specialityObject: Speciality | undefined = undefined;
+        if (speciality) {
+            const specialityFound = await this.specialityRepository.findOne(speciality);
+            if (specialityFound) {
+                specialityObject = specialityFound;
+            } else {
+                throw new NotFoundException('Speciality not found');
+            }
+        }
+
+        const user:User = new User();
+
+        user.firstName = ldapUserDto.firstName;
+        user.lastName = ldapUserDto.lastName;
+        user.email = ldapUserDto.email;
+        user.password = ldapUserDto.password ? await this.passwordService.hashPassword(ldapUserDto.password) : undefined;
+        user.isAdmin = false;
+        user.gender = "Not Defined";
+        user.speciality = specialityObject;
+        user.username = ldapUserDto.username;
+        user.isValid = false;
+        console.log(user)
+        try {
+            return await this.userRepository.save(user);
+        } catch (error) {
+            if(isConstraint(error,UNIQUE_MAIL)){
+                throw new BadRequestException('This email is already used');
+            } else {
+                throw new InternalServerErrorException('Unable to create new user')
+            }
         }
     }
 
@@ -99,8 +152,13 @@ export class UserService{
         }
     }
 
-    async update(updateUserDto: UpdateUserDto, id: number){
-        const userEntity = await this.dtoToUserEntity(updateUserDto);
+    async validate( id: number, updateUserDto: UpdateUserDto){
+        
+        const userEntity = {
+            gender: updateUserDto.gender,
+            isValid: true
+        };
+        
         try {
             await this.userRepository.update(id, userEntity);
             const user = await this.findOne(id);
@@ -111,6 +169,17 @@ export class UserService{
             } else {
                 throw new InternalServerErrorException('Unable to update new user')
             }
+        }
+    }
+
+    async changePassword(id: number, password: string){
+        const body = {
+            password: password
+        }
+        try {
+            await this.userRepository.update(id,body)
+        } catch (error) {
+            throw new InternalServerErrorException('Unable to change password')
         }
     }
 

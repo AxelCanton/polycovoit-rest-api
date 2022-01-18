@@ -74,7 +74,6 @@ export class ReservationService {
   async update(id: number, updateReservationDto: UpdateReservationDto) {
     
     try {
-      console.log("id : ", id, " updateReservationDto : ", updateReservationDto.accepted)
       await this.reservationRepository.update(id, updateReservationDto);
       return this.findOne(id);
     } catch (error) {

@@ -4,6 +4,9 @@ import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/user/entities/user.entity';
 
+import * as ldap from 'ldapjs';
+import { LdapUserDto } from 'src/user/dto/ldap-user.dto';
+
 @Injectable()
 export class AuthService {
 
@@ -13,15 +16,124 @@ export class AuthService {
         private jwtService: JwtService
     ){}
 
-    async validateUser(email: string, password: string): Promise<User | null>{
-        const user: User = await this.userService.findByMail(email);
-        if(user){
+    public async validateUser(username: string, password: string): Promise<LdapUserDto | User> {
+
+        const user: User = await this.userService.findByUsername(username);
+
+        if (user) {
             const validPassword: boolean = await this.passwordService.checkPassword(password, user.password);
-            if(validPassword){
+            if (validPassword) {
                 return user;
+            } else {
+                let bind: any = await this.handleBind({
+                    username: username,
+                    password: password
+                });
+
+                if (bind.success === true){
+                    const hashedPassword = await this.passwordService.hashPassword(password)
+                    await this.userService.changePassword(user.id, hashedPassword)
+                    return this.validateUser(username, password)
+                }
+            }
+        } else {
+            let bind: any = await this.handleBind({
+                username: username,
+                password: password
+            });
+
+            if (bind.success === true) {
+                const search: any = await this.handleSearch({
+                    username: username,
+                    password: password
+                })
+                const user = search.user
+
+                const ldapUser : LdapUserDto = {
+                    username: user.cn,
+                    email: user.mail,
+                    firstName: user.cn.split('.')[0],
+                    lastName: user.cn.split('.')[1],
+                    speciality: user.department,
+                    ldap: true,
+                    password: password
+                };
+
+                if (ldapUser) {
+                    return this.userService.createLdapUser(ldapUser);
+                }
             }
         }
-        return null;    
+        
+    }
+
+    private async handleBind(req: any) {
+        let ldapClient = ldap.createClient({
+            url: process.env.LDAP_HOST
+        });
+         let bind: any = await new Promise((resolve) => {
+            ldapClient.bind(`${req.username}@isim.intra`, req.password, (err) => {
+                if (err) {
+                    return resolve({
+                        success: false
+                    })
+                }
+                return resolve({
+                    success: true
+                })
+            })
+        });
+        if (bind.success) ldapClient.unbind()
+        ldapClient.destroy()
+        return bind
+
+    }
+
+    private async handleSearch(req: any) {
+        let ldapClient = ldap.createClient({
+            url: process.env.LDAP_HOST,
+            bindDN: `${req.username}@isim.intra`,
+            bindCredentials: req.password
+        })
+
+        const opts: ldap.SearchOptions = {
+            filter: `(|(cn=${req.username})(dn=${req.username}))`,
+            scope: 'sub',
+            attributes: ["cn", 'department', 'mail']
+        };
+
+        let ret = await new Promise((resolve) => {
+            ldapClient.search(' OU=Etudiants, OU=Comptes,DC=isim, DC=intra', opts, (err, res) => {
+                if (err) {
+                    return resolve({
+                        user: null,
+                        msg: `error on connection : ${err}`
+                    })
+                } else {
+                    res.on('searchEntry', function (entry) {
+                        return resolve({
+                            user: entry.object,
+                            msg: "ok"
+                        })
+                    });
+                    res.on('error', function (err) {
+                        return resolve({
+                            user: null,
+                            msg: `error on search : ${err}`
+                        })
+                    });
+                    res.on('end', function (result) {
+                        return resolve({
+                            user: null,
+                            msg: `function ended : ${result}`
+                        })
+                    });
+                }
+            })
+        })
+
+        ldapClient.destroy()
+        return ret
     }
 
     async login(user: any){
@@ -45,7 +157,8 @@ export class AuthService {
 
         return {
             access_token: accessToken,
-            refresh_token: refreshToken
+            refresh_token: refreshToken,
+            isValid: user.isValid
         }
     }
 

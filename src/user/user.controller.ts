@@ -45,15 +45,23 @@ export class UserController{
         return await this.userService.findOne(+id);
     }
 
-    @Patch(':id')
+    @Get('/speciality/:name')
+    @ApiOkResponse({description:"All the users from the speciality"})
+    @ApiNotFoundResponse({description:"Speciality not found"})
+    @ApiUnauthorizedResponse({description:"You are not authorized"})
+    async findForSpeciality(@Param('name') name: string){
+        return await this.userService.findForSpeciality(name);
+    }
+
+    @Patch('/validate/:id')
     @ApiCreatedResponse({description:"The user has been modified"})
     @ApiNotFoundResponse({description:"User not found"})
     @ApiUnauthorizedResponse({description:"You are not authorized"})
-    async update(@Body() updateUserDto: UpdateUserDto, @Param('id') id: string, @Req() req){
+    async validate(@Body() updateUserDto: UpdateUserDto, @Param('id') id: string, @Req() req){
         if (parseInt(id) !== req.user.id) {
             throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
         }
-        return await this.userService.update(updateUserDto,+id);
+        return await this.userService.validate(+id,updateUserDto);
     }
 
     @Delete(':id')
