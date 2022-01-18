@@ -13,6 +13,9 @@ export class User {
     id: number;
 
     @Column()
+    username: string;
+
+    @Column()
     firstName: string;
 
     @Column()
@@ -22,11 +25,14 @@ export class User {
     email: string;
 
     @Column()
-    gender: string
+    gender: string | null;
 
     @Column()
     @Exclude()
     password: string;
+
+    @Column()
+    isValid: boolean;
 
     @Column({
         default: ''

@@ -51,6 +51,7 @@ export class ReservationController {
           email: reservation.askingUser.email,
           gender: reservation.askingUser.gender,
           speciality: reservation.askingUser.speciality.specialityName,
+          isValid: reservation.askingUser.isValid
         }
       }
       resToReturn.push(res);
@@ -77,6 +78,7 @@ export class ReservationController {
           id: reservation.askingUser.id,
           gender: reservation.askingUser.gender,
           speciality: reservation.askingUser.speciality.specialityName,
+          isValid: reservation.askingUser.isValid,
         }
       }
       if (reservation.accepted !== 1){
@@ -89,6 +91,7 @@ export class ReservationController {
           email: reservation.askingUser.email,
           gender: reservation.askingUser.gender,
           speciality: reservation.askingUser.speciality.specialityName,
+          isValid: reservation.askingUser.isValid
         }
         resToReturn.push(res);
       }

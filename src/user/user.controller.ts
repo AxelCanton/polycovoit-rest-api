@@ -48,12 +48,12 @@ export class UserController{
         return await this.userService.findForSpeciality(name);
     }
 
-    @Patch(':id')
+    @Patch('/validate/:id')
     @ApiCreatedResponse({description:"The user has been modified"})
     @ApiNotFoundResponse({description:"User not found"})
     @ApiUnauthorizedResponse({description:"You are not authorized"})
-    async update(@Body() updateUserDto: UpdateUserDto, @Param('id') id: string){
-        return await this.userService.update(updateUserDto,+id);
+    async validate(@Body() updateUserDto: UpdateUserDto, @Param('id') id: string){
+        return await this.userService.validate(+id,updateUserDto);
     }
 
     @Delete(':id')

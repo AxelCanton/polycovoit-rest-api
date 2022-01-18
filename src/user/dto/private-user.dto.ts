@@ -10,4 +10,6 @@ export class PrivateUserDto{
     gender: string
     
     speciality: string;
+
+    isValid: boolean;
 }

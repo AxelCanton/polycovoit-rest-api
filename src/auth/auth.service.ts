@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/user/entities/user.entity';
 
 import * as ldap from 'ldapjs';
+import { LdapUserDto } from 'src/user/dto/ldap-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,31 +16,60 @@ export class AuthService {
         private jwtService: JwtService
     ){}
 
-    public async validateUser(username: string, password: string) {
-        
-        let bind: any = await this.handleBind({
-            username: username,
-            password: password
-        });
-        if (bind.success === true) {
-            const search: any = await this.handleSearch({
+    public async validateUser(username: string, password: string): Promise<LdapUserDto | User> {
+
+        const user: User = await this.userService.findByUsername(username);
+
+        if (user) {
+            const validPassword: boolean = await this.passwordService.checkPassword(password, user.password);
+            if (validPassword) {
+                return user;
+            } else {
+                let bind: any = await this.handleBind({
+                    username: username,
+                    password: password
+                });
+
+                if (bind.success === true){
+                    const hashedPassword = await this.passwordService.hashPassword(password)
+                    await this.userService.changePassword(user.id, hashedPassword)
+                    return this.validateUser(username, password)
+                }
+            }
+        } else {
+            let bind: any = await this.handleBind({
                 username: username,
                 password: password
-            })
-            const user = search.user
-            if (user) {
-                return {
+            });
+
+            if (bind.success === true) {
+                const search: any = await this.handleSearch({
                     username: username,
-                    department: user.department,
-                    mail: user.mail
+                    password: password
+                })
+                const user = search.user
+
+                const ldapUser : LdapUserDto = {
+                    username: user.cn,
+                    email: user.mail,
+                    firstName: user.cn.split('.')[0],
+                    lastName: user.cn.split('.')[1],
+                    speciality: user.department,
+                    ldap: true,
+                    password: password
                 };
+
+                if (ldapUser) {
+                    return this.userService.createLdapUser(ldapUser);
+                }
             }
         }
+        
     }
 
     private async handleBind(req: any) {
         let ldapClient = ldap.createClient({
-            url: 'ldap://ldap.polytech.univ-montp2.fr'
+            url: process.env.LDAP_HOST
         });
          let bind: any = await new Promise((resolve) => {
             ldapClient.bind(`${req.username}@isim.intra`, req.password, (err) => {
@@ -61,7 +91,7 @@ export class AuthService {
 
     private async handleSearch(req: any) {
         let ldapClient = ldap.createClient({
-            url: 'ldap://ldap.polytech.univ-montp2.fr',
+            url: process.env.LDAP_HOST,
             bindDN: `${req.username}@isim.intra`,
             bindCredentials: req.password
         })
@@ -106,17 +136,6 @@ export class AuthService {
         return ret
     }
 
-    // async validateUser(email: string, password: string): Promise<User | null>{
-    //     const user: User = await this.userService.findByMail(email);
-    //     if(user){
-    //         const validPassword: boolean = await this.passwordService.checkPassword(password, user.password);
-    //         if(validPassword){
-    //             return user;
-    //         }
-    //     }
-    //     return null;    
-    // }
-
     async login(user: any){
         const accessTokenPayload = {
             email: user.email,
@@ -138,7 +157,8 @@ export class AuthService {
 
         return {
             access_token: accessToken,
-            refresh_token: refreshToken
+            refresh_token: refreshToken,
+            isValid: user.isValid
         }
     }
 
