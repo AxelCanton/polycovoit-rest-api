@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LocationModel } from 'src/location/entities/location.entity';
+import { MailService } from 'src/mail/mail.service';
 import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateReservationDto } from './dto/create-reservation.dto';
@@ -17,6 +18,7 @@ export class ReservationService {
     private userRepository: Repository<User>,
     @InjectRepository(LocationModel)
     private locationRepository: Repository<LocationModel>,
+    private readonly mailService: MailService
   ){}
 
   async create(createReservationDto: CreateReservationDto, idAskingUser: number) {
@@ -32,6 +34,9 @@ export class ReservationService {
       reservation.receivingUser = location.user;
       reservation.location = location;
       reservation.date = createReservationDto.date;
+
+      await this.mailService.sendUserDemand(location.user.email)
+
       return await this.reservationRepository.save(reservation);
     } catch (error) {
       throw new InternalServerErrorException('Unable to create new reservation')
@@ -71,10 +76,14 @@ export class ReservationService {
     });
   }
 
+  //Utilisé uniquement pour la validation ou non d'une reservation
+
   async update(id: number, updateReservationDto: UpdateReservationDto) {
     
     try {
+      const reservation = await this.reservationRepository.findOne(id, {relations: ["askingUser"]})
       await this.reservationRepository.update(id, updateReservationDto);
+      await this.mailService.sendUserResponse(reservation.askingUser.email)
       return this.findOne(id);
     } catch (error) {
       throw new InternalServerErrorException('Unable to update reservation')

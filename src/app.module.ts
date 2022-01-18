@@ -8,6 +8,7 @@ import { configService } from './config/config.service';
 import { SpecialityModule } from './speciality/speciality.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TaskModule } from './task/task.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -19,6 +20,8 @@ import { TaskModule } from './task/task.module';
     ScheduleModule.forRoot(),
     SpecialityModule,
     TaskModule,
+    SpecialityModule,
+    MailModule
   ],
   controllers: [],
   providers: [],
