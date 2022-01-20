@@ -158,7 +158,8 @@ export class AuthService {
         return {
             access_token: accessToken,
             refresh_token: refreshToken,
-            isValid: user.isValid
+            isValid: user.isValid,
+            isAdmin: user.isAdmin
         }
     }
 
