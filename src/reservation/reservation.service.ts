@@ -105,7 +105,6 @@ export class ReservationService {
     if (!reservation) {
       throw new NotFoundException(`Reservation id ${idReservation} not found`);
     }
-
     if (reservation.askingUser.id !== idUser && reservation.receivingUser.id !== idUser) {
       throw new ForbiddenException('Forbidden');
     }

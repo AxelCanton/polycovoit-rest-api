@@ -102,13 +102,12 @@ export class ReservationController {
   }
 
   @Patch(':id')
-  @Public()
   @ApiCreatedResponse({description:"The reservation has been modified"})
   @ApiNotFoundResponse({description:"Reservation not found"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
-  async update(@Body() updateReservationDto: UpdateReservationDto, @Param('id') id: string, @Req() req) {
+  async update(@Param('id') id: string, @Req() req) {
     await this.reservationService.fetchIfUserValid(req.user.id, +id);
-    return await this.reservationService.update(+id, updateReservationDto);
+    return await this.reservationService.update(+id, req.body);
   }
 
   @Delete(':id')
