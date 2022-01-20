@@ -8,6 +8,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import validationConfig from './config/config.validation';
+import { ValidUserGuard } from './utils/guards/validUser.guard';
 import { RequestLoggerInterceptor } from './utils/requestLogger.interceptor';
 import { RolesGuard } from './utils/roles/roles.guard';
 
@@ -33,7 +34,11 @@ async function bootstrap() {
   globalInterceptors.push(new ClassSerializerInterceptor(reflector));
 
   app.useGlobalPipes(new ValidationPipe(validationConfig));
-  app.useGlobalGuards(new JwtAuthGuard(reflector), new RolesGuard(reflector)); // JwtAuthGuard must be executed before RolesGuard (the latter uses the former to validate)
+  app.useGlobalGuards(
+    new JwtAuthGuard(reflector),
+    new RolesGuard(reflector),
+    new ValidUserGuard(reflector),
+  ); // JwtAuthGuard must be executed before every other guards (because they used what it returns)
   app.useGlobalInterceptors(...globalInterceptors);
 
   // Enable CORS
