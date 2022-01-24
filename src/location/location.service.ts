@@ -21,6 +21,7 @@ export class LocationService {
       throw new NotFoundException("User not found");
     }
     const location: LocationModel = new LocationModel();
+    location.country = createLocationDto.country;
     location.city = createLocationDto.city;
     location.postalCode = createLocationDto.postalCode;
     location.user = user;

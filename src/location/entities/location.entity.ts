@@ -7,6 +7,9 @@ export class LocationModel {
     id: number;
 
     @Column()
+    country: string;
+
+    @Column()
     postalCode: number;
 
     @Column()
