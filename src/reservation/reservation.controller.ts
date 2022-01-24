@@ -42,6 +42,7 @@ export class ReservationController {
       const res : PrivateReservation = {
         id: reservation.id,
         postalCode: reservation.location.postalCode,
+        city: reservation.location.city,
         message: reservation.message,
         accepted: reservation.accepted,
         date: reservation.date,
@@ -72,6 +73,7 @@ export class ReservationController {
       const res : PrivateReservation = {
         id: reservation.id,
         postalCode: reservation.location.postalCode,
+        city: reservation.location.city,
         message: reservation.message,
         accepted: reservation.accepted,
         date: reservation.date,

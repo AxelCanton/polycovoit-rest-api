@@ -28,6 +28,23 @@ export class SpecialityController {
     return this.specialityService.findAll();
   }
 
+  @Get('users')
+  @ApiOkResponse({description:"The speciality has been deleted"})
+  @ApiNotFoundResponse({description:"Speciality not found"})
+  @ApiUnauthorizedResponse({description:"You are not authorized"})
+  @Role(RoleEnum.Admin)
+  async getAllBySpeciality(){
+      const specialities = await this.specialityService.findAll();
+      let result = [];
+      for( let speciality of specialities ){
+          result.push({
+              id: speciality.specialityName,
+              value: speciality.users.length
+          })
+      }
+      return result;
+  }
+
   @Get(':name')
   @ApiOkResponse({description:"The speciality"})
   @ApiNotFoundResponse({description:"Speciality not found"})

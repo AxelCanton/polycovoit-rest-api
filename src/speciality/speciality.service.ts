@@ -26,7 +26,7 @@ export class SpecialityService {
   }
 
   async findAll() {
-    return await this.specialityRepository.find();
+    return await this.specialityRepository.find({relations:['users']});
   }
 
   async findOne(name: string) {

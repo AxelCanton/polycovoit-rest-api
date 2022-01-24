@@ -23,7 +23,7 @@ export class UserService{
         private passwordService: PasswordService
     ){}
 
-    async dtoToUserEntity (dto: CreateUserDto | UpdateUserDto) {
+    async dtoToUserEntity (dto: CreateUserDto) {
         const user = new User();
         const speciality: string | undefined = dto.speciality;
         let specialityObject: Speciality | undefined = undefined;
@@ -44,19 +44,14 @@ export class UserService{
         user.speciality = specialityObject;
         user.username = dto.username;
         user.isValid = true;
+        user.creationDate = new Date();
+        console.log(user);
 
         return user;
     }
 
     async findAll(){
-        return await this.userRepository.find({
-            join: {
-                alias: "user",
-                leftJoinAndSelect:{
-                    speciality: "user.speciality"
-                } 
-            }
-        });
+        return await this.userRepository.find({relations:['speciality','locations']});
 
     }
 
@@ -127,13 +122,14 @@ export class UserService{
         user.speciality = specialityObject;
         user.username = ldapUserDto.username;
         user.isValid = false;
-        console.log(user)
+        user.creationDate = new Date();
         try {
             return await this.userRepository.save(user);
         } catch (error) {
             if(isConstraint(error,UNIQUE_MAIL)){
                 throw new BadRequestException('This email is already used');
             } else {
+                console.log(error);
                 throw new InternalServerErrorException('Unable to create new user')
             }
         }
@@ -147,6 +143,7 @@ export class UserService{
             if(isConstraint(error,UNIQUE_MAIL)){
                 throw new BadRequestException('This email is already used');
             } else {
+                console.log(error);
                 throw new InternalServerErrorException('Unable to create new user')
             }
         }
@@ -180,6 +177,17 @@ export class UserService{
             await this.userRepository.update(id,body)
         } catch (error) {
             throw new InternalServerErrorException('Unable to change password')
+        }
+    }
+
+    async makeAdmin(id: number){
+        const body = {
+            isAdmin: true
+        }
+        try {
+            await this.userRepository.update(id,body)
+        } catch (error) {
+            throw new InternalServerErrorException('Unable to make admin')
         }
     }
 

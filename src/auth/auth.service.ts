@@ -64,7 +64,6 @@ export class AuthService {
                 }
             }
         }
-        
     }
 
     private async handleBind(req: any) {

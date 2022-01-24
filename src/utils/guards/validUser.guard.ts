@@ -12,14 +12,17 @@ export class ValidUserGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
+    const noValidationRequired = (context.getHandler().name === 'validate' || (context.getHandler().name === 'create' && context.getClass().name === 'LocationController') || context.getClass().name === 'SpecialityController')
 
+    if(noValidationRequired){
+      return true;
+    }
     if (isPublic) {
       return true;
     }
 
     const { user }: { user: User } = context.switchToHttp().getRequest();
     const userValid = user.isValid;
-    console.log(userValid)
     return userValid;
   }
 }

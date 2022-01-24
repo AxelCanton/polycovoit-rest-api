@@ -25,7 +25,7 @@ export class User {
     email: string;
 
     @Column()
-    gender: string | null;
+    gender: string;
 
     @Column()
     @Exclude()
@@ -47,6 +47,9 @@ export class User {
         nullable: true,
     })
     expiryDate: Date;
+
+    @Column()
+    creationDate: Date;
 
     @OneToMany(() => LocationModel, location => location.user)
     locations: LocationModel[];

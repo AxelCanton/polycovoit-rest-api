@@ -7,6 +7,7 @@ import { Role } from "src/utils/roles/roles.decorator";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { UserService } from "./user.service";
+import { SpecialityService } from "src/speciality/speciality.service";
 
 @ApiTags('User')
 @Role(RoleEnum.User)
@@ -15,6 +16,7 @@ export class UserController{
 
     constructor(
         private readonly userService: UserService,
+        private readonly specialityService: SpecialityService
     ){}
 
     @Public()
@@ -75,4 +77,13 @@ export class UserController{
         return await this.userService.setExpiry(+id);
     }
 
+    @Patch('/make-admin/:id')
+    //@Role(RoleEnum.Admin)
+    @Public()
+    @ApiCreatedResponse({description:"The user has been modified"})
+    @ApiNotFoundResponse({description:"User not found"})
+    @ApiUnauthorizedResponse({description:"You are not authorized"})
+    async makeAdmin(@Param('id') id:string){
+        return await this.userService.makeAdmin(+id)
+    }
 }
