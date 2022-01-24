@@ -7,7 +7,6 @@ import { Role } from "src/utils/roles/roles.decorator";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { UserService } from "./user.service";
-import { SpecialityService } from "src/speciality/speciality.service";
 
 @ApiTags('User')
 @Role(RoleEnum.User)
@@ -15,8 +14,7 @@ import { SpecialityService } from "src/speciality/speciality.service";
 export class UserController{
 
     constructor(
-        private readonly userService: UserService,
-        private readonly specialityService: SpecialityService
+        private readonly userService: UserService
     ){}
 
     @Public()
