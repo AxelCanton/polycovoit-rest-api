@@ -7,8 +7,12 @@ WORKDIR /app
 
 COPY ["package.json", "package-lock.json*", "./"]
 
-RUN npm install --production
+RUN npm install
 
 COPY . .
 
-CMD [ "node", "dist/main" ]
+RUN npm install -g @nestjs/cli
+
+RUN npm run build
+
+CMD [ "npm", "run", "start:prod" ]
