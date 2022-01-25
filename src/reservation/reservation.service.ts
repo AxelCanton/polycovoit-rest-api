@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { LocationModel } from 'src/location/entities/location.entity';
 import { MailService } from 'src/mail/mail.service';
 import { User } from 'src/user/entities/user.entity';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { Reservation } from './entities/reservation.entity';
@@ -109,5 +109,12 @@ export class ReservationService {
       throw new ForbiddenException('Forbidden');
     }
     return reservation;
+  }
+
+  async getReservationAfter(date: Date){
+    return await this.reservationRepository.find({
+      select: ["id","date"], 
+      relations: ["askingUser","askingUser.speciality"],
+      where: {date: MoreThan(date)}})
   }
 }

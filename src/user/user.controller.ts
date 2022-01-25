@@ -17,8 +17,9 @@ export class UserController{
         private readonly userService: UserService
     ){}
 
-    @Public()
+    
     @Post()
+    @Role(RoleEnum.Admin)
     @ApiCreatedResponse({description:"User have been created"})
     @ApiBadRequestResponse({description:"Bad parameters, user not created"})
     @ApiUnauthorizedResponse({description:"You are not authorized"})
@@ -75,13 +76,12 @@ export class UserController{
         return await this.userService.setExpiry(+id);
     }
 
-    @Patch('/make-admin/:id')
-    //@Role(RoleEnum.Admin)
-    @Public()
+    @Patch('/make-admin/:username')
+    @Role(RoleEnum.Admin)
     @ApiCreatedResponse({description:"The user has been modified"})
     @ApiNotFoundResponse({description:"User not found"})
     @ApiUnauthorizedResponse({description:"You are not authorized"})
-    async makeAdmin(@Param('id') id:string){
-        return await this.userService.makeAdmin(+id)
+    async makeAdmin(@Param('username') username:string){
+        return await this.userService.makeAdmin(username)
     }
 }
