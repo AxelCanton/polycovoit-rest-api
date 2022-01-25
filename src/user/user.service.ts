@@ -7,7 +7,7 @@ import { LessThanOrEqual, Repository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { LdapUserDto } from "./dto/ldap-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { UNIQUE_MAIL, User } from "./entities/user.entity";
+import { UNIQUE_MAIL, UNIQUE_USERNAME, User } from "./entities/user.entity";
 import { PasswordService } from "./password.service";
 
 
@@ -45,7 +45,6 @@ export class UserService{
         user.username = dto.username;
         user.isValid = true;
         user.creationDate = new Date();
-        console.log(user);
 
         return user;
     }
@@ -140,8 +139,8 @@ export class UserService{
         try {
             return await this.userRepository.save(user);
         } catch (error) {
-            if(isConstraint(error,UNIQUE_MAIL)){
-                throw new BadRequestException('This email is already used');
+            if(isConstraint(error,UNIQUE_MAIL) && isConstraint(error,UNIQUE_USERNAME)){
+                throw new BadRequestException('This email or username is already used');
             } else {
                 console.log(error);
                 throw new InternalServerErrorException('Unable to create new user')
@@ -180,14 +179,21 @@ export class UserService{
         }
     }
 
-    async makeAdmin(id: number){
+    async makeAdmin(username: string){
+
+        const user = await this.findByUsername(username)
+        
         const body = {
             isAdmin: true
         }
-        try {
-            await this.userRepository.update(id,body)
-        } catch (error) {
-            throw new InternalServerErrorException('Unable to make admin')
+        if(user){
+            try {
+                await this.userRepository.update(user.id,body)
+            } catch (error) {
+                throw new InternalServerErrorException('Unable to make admin')
+            }
+        } else {
+            throw new NotFoundException('Username not found')
         }
     }
 

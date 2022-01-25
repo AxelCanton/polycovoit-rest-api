@@ -5,9 +5,11 @@ import { Exclude } from 'class-transformer';
 import { Speciality } from "src/speciality/entities/speciality.entity";
 
 export const UNIQUE_MAIL = 'UNIQUE_MAIL'
+export const UNIQUE_USERNAME = 'UNIQUE_USERNAME'
 
 @Entity()
 @Unique(UNIQUE_MAIL, ['email'])
+@Unique(UNIQUE_USERNAME, ['username'])
 export class User {
     @PrimaryGeneratedColumn()
     id: number;

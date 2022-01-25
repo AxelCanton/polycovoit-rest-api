@@ -120,4 +120,23 @@ export class ReservationController {
     await this.reservationService.fetchIfUserValid(req.user.id, +id);
     return await this.reservationService.remove(+id);
   }
+
+  @Get('/after/:date')
+  @Role(RoleEnum.Admin)
+  @ApiOkResponse({description:"The reservations made after the given date"})
+  @ApiUnauthorizedResponse({description:"You are not authorized or not connected as a user"})
+  async reservationAfterDate(@Param('date') date:string){
+    const formatedDate = new Date(parseInt(date.split("-")[0]),parseInt(date.split("-")[1]),parseInt(date.split("-")[2]))
+    const res = await this.reservationService.getReservationAfter(formatedDate)
+    const toReturn = []
+    for (let reservation of res) {
+      toReturn.push({
+        id: reservation.id,
+        date: reservation.date,
+        speciality: reservation.askingUser.speciality.specialityName
+      })
+    }
+
+    return toReturn
+  }
 }
