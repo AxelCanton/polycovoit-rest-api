@@ -44,6 +44,9 @@ async function bootstrap() {
   // Enable CORS
   app.enableCors();
 
+  // Add a global prefix
+  app.setGlobalPrefix('api');
+
   await app.listen(process.env.SERVER_PORT || 5000);
 }
 bootstrap();
