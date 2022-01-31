@@ -42,9 +42,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(...globalInterceptors);
 
   // Enable CORS
-  app.enableCors({
-    origin: 'http://localhost:3000',
-  });
+  app.enableCors();
 
   await app.listen(process.env.SERVER_PORT || 5000);
 }
