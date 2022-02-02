@@ -152,7 +152,7 @@ export class AuthService {
             expiresIn: '14d'
         });
 
-        this.userService.updateRefreshToken(refreshToken, user.id);
+        await this.userService.updateRefreshToken(refreshToken, user.id);
 
         return {
             access_token: accessToken,
