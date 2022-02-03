@@ -44,9 +44,9 @@ export class LocationController {
     const swLat = parseFloat(sw_lat);
     const swLong = parseFloat(sw_long);
     const locations = await this.locationService.findByCoordinates(neLat, neLong, swLat, swLong, specialities);
-
+    console.log(locations);
     // We don't want to expose the address and the user whom they belong to.
-    const privateLocations = locations.map((location) => new PrivateLocationDto(location.id, location.postalCode, location.city, location.latitude, location.longitude, location.user.gender, location.user.speciality.specialityName));
+    const privateLocations = locations.map((location) => new PrivateLocationDto(location.id, location.postalCode, location.city, location.latitude, location.longitude, location.user.gender, location.user.speciality.specialityName, false));
     return privateLocations;
   }
 

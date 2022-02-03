@@ -35,6 +35,13 @@ export class UserController{
         return await this.userService.findAll();
     }
 
+    @Get('/verify-admin')
+    async verifyAdmin(@Req() req){
+        const user = await this.userService.findOne(req.user.id)
+
+        return user.isAdmin
+    }
+
     @Get(':id')
     @ApiOkResponse({description:"The user"})
     @ApiNotFoundResponse({description:"User not found"})
@@ -77,11 +84,14 @@ export class UserController{
     }
 
     @Patch('/make-admin/:username')
-    @Role(RoleEnum.Admin)
+    //@Role(RoleEnum.Admin)
+    @Public()
     @ApiCreatedResponse({description:"The user has been modified"})
     @ApiNotFoundResponse({description:"User not found"})
     @ApiUnauthorizedResponse({description:"You are not authorized"})
     async makeAdmin(@Param('username') username:string){
         return await this.userService.makeAdmin(username)
     }
+
+    
 }
