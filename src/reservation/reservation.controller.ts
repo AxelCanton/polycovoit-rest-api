@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Header, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Header, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
@@ -7,19 +7,26 @@ import { RoleEnum } from 'src/utils/roles/role.enum';
 import { Role } from 'src/utils/roles/roles.decorator';
 import { PrivateReservation } from './dto/private-reservation.dto';
 import { Public } from 'src/utils/roles/public.decorator';
+import { LocationService } from 'src/location/location.service';
 
 @ApiTags('Reservation')
 @Role(RoleEnum.User)
 @Controller('reservation')
 export class ReservationController {
-  constructor(private readonly reservationService: ReservationService) {}
+  constructor(private readonly reservationService: ReservationService, private readonly locationService:LocationService) {}
 
   @Post()
   @ApiCreatedResponse({description:"Reservation have been created"})
   @ApiBadRequestResponse({description:"Bad parameters, reservation not created"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
   async create(@Body() createReservationDto: CreateReservationDto, @Req() req) {
-    return (await this.reservationService.create(createReservationDto,req.user.id)).id;
+
+    const location = await this.locationService.findOne(createReservationDto.locationId)
+    if (location.user.id !== req.user.id) {
+      return (await this.reservationService.create(createReservationDto,req.user.id)).id;
+    } else {
+      throw new UnauthorizedException()
+    }
   }
 
   @Get()

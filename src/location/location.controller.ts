@@ -34,7 +34,7 @@ export class LocationController {
   }
 
   @Get()
-  async findByCoordinates(@Query('ne_lat') ne_lat: string, @Query('ne_long') ne_long: string, @Query('sw_lat') sw_lat: string, @Query('sw_long') sw_long: string, @Query('specialities') specialities: string[]): Promise<PrivateLocationDto[]> {
+  async findByCoordinates(@Query('ne_lat') ne_lat: string, @Query('ne_long') ne_long: string, @Query('sw_lat') sw_lat: string, @Query('sw_long') sw_long: string, @Query('specialities') specialities: string[], @Req() req): Promise<PrivateLocationDto[]> {
     const isValidQueryParams = isNumeric(ne_lat) && isNumeric(ne_long) && isNumeric(sw_lat) && isNumeric(sw_long);
     if(!isValidQueryParams) {
       throw new BadRequestException('Invalid coordinates');
@@ -44,9 +44,8 @@ export class LocationController {
     const swLat = parseFloat(sw_lat);
     const swLong = parseFloat(sw_long);
     const locations = await this.locationService.findByCoordinates(neLat, neLong, swLat, swLong, specialities);
-    console.log(locations);
     // We don't want to expose the address and the user whom they belong to.
-    const privateLocations = locations.map((location) => new PrivateLocationDto(location.id, location.postalCode, location.city, location.latitude, location.longitude, location.user.gender, location.user.speciality.specialityName, false));
+    const privateLocations = locations.map((location) => new PrivateLocationDto(location.id, location.postalCode, location.city, location.latitude, location.longitude, location.user.gender, location.user.speciality.specialityName, location.user.id === req.user.id? true:false));
     return privateLocations;
   }
 
