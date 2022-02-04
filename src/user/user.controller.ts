@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger";
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post,  Req } from "@nestjs/common";
-import { Public } from "src/utils/roles/public.decorator";
 import { RoleEnum } from "src/utils/roles/role.enum";
 import { Role } from "src/utils/roles/roles.decorator";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -80,7 +79,7 @@ export class UserController{
         if (parseInt(id) !== req.user.id) {
             throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
         }
-        return await this.userService.setExpiry(+id);
+        return await this.userService.delete(+id);
     }
 
     @Patch('/make-admin/:username')
@@ -90,7 +89,5 @@ export class UserController{
     @ApiUnauthorizedResponse({description:"You are not authorized"})
     async makeAdmin(@Param('username') username:string){
         return await this.userService.makeAdmin(username)
-    }
-
-    
+    } 
 }
