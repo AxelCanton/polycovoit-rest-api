@@ -8,12 +8,13 @@ import { Role } from 'src/utils/roles/roles.decorator';
 import { RoleEnum } from 'src/utils/roles/role.enum';
 
 @ApiTags('Speciality')
-@Public()
+@Role(RoleEnum.User)
 @Controller('speciality')
 export class SpecialityController {
   constructor(private readonly specialityService: SpecialityService) {}
 
   @Post()
+  @Role(RoleEnum.Admin)
   @ApiCreatedResponse({description:"Speciality have been created"})
   @ApiBadRequestResponse({description:"Bad parameters, speciality not created"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
@@ -54,6 +55,7 @@ export class SpecialityController {
   }
 
   @Patch(':name')
+  @Role(RoleEnum.Admin)
   @ApiCreatedResponse({description:"The speciality has been modified"})
   @ApiNotFoundResponse({description:"Speciality not found"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
@@ -62,6 +64,7 @@ export class SpecialityController {
   }
 
   @Delete(':name')
+  @Role(RoleEnum.Admin)
   @ApiOkResponse({description:"The speciality has been deleted"})
   @ApiNotFoundResponse({description:"Speciality not found"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})

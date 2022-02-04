@@ -128,7 +128,6 @@ export class UserService{
             if(isConstraint(error,UNIQUE_MAIL)){
                 throw new BadRequestException('This email is already used');
             } else {
-                console.log(error);
                 throw new InternalServerErrorException('Unable to create new user')
             }
         }
@@ -142,7 +141,6 @@ export class UserService{
             if(isConstraint(error,UNIQUE_MAIL) && isConstraint(error,UNIQUE_USERNAME)){
                 throw new BadRequestException('This email or username is already used');
             } else {
-                console.log(error);
                 throw new InternalServerErrorException('Unable to create new user')
             }
         }

@@ -84,8 +84,7 @@ export class UserController{
     }
 
     @Patch('/make-admin/:username')
-    //@Role(RoleEnum.Admin)
-    @Public()
+    @Role(RoleEnum.Admin)
     @ApiCreatedResponse({description:"The user has been modified"})
     @ApiNotFoundResponse({description:"User not found"})
     @ApiUnauthorizedResponse({description:"You are not authorized"})

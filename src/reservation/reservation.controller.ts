@@ -30,7 +30,6 @@ export class ReservationController {
   }
 
   @Get()
-  @Public()
   @ApiOkResponse({description:"All the existing reservations"})
   @ApiUnauthorizedResponse({description:"You are not authorized"})
   @Role(RoleEnum.Admin)
