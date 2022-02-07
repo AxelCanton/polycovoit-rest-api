@@ -48,7 +48,7 @@ export class User {
     @Column({
         nullable: true,
     })
-    expiryDate: Date;
+    lastConnectionDate: Date;
 
     @Column()
     creationDate: Date;

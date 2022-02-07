@@ -6,7 +6,7 @@ import { UserService } from 'src/user/user.service';
 export class TasksService {
     constructor(private userService: UserService) {}
     
-    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+    @Cron(CronExpression.EVERY_WEEK)
     handleCron() {
         this.userService.deleteExpiredAccount();
     }

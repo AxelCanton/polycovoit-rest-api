@@ -198,7 +198,8 @@ export class UserService{
     async updateRefreshToken(refreshToken: string, id: number) {
         try {
             await this.userRepository.update(id, {
-                refreshToken: refreshToken
+                refreshToken: refreshToken,
+                lastConnectionDate: new Date()
             });
         } catch(error) {
             throw new InternalServerErrorException();
@@ -222,19 +223,13 @@ export class UserService{
         }
     }
 
-    async setExpiry(id: number) {
-        // Expiry is 3 days after today
-        const expiry = new Date();
-        expiry.setMonth(expiry.getDate() + 3);
 
-        await this.userRepository.update(id, {
-            expiryDate: expiry
-        });
-    }
-
+    // Delete every accounts that haven't used the app for 2 years
     async deleteExpiredAccount() {
+        const expiryDate = new Date();
+        expiryDate.setFullYear(expiryDate.getFullYear() - 2);
         await this.userRepository.delete({
-            expiryDate: LessThanOrEqual(new Date())
+            lastConnectionDate: LessThanOrEqual(expiryDate)
         });
     }
 
