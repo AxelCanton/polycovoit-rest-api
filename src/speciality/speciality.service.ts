@@ -18,10 +18,9 @@ export class SpecialityService {
     try{ 
       const speciality: Speciality = new Speciality();
       speciality.specialityName = createSpecialityDto.specialityName;
-
       return await this.specialityRepository.save(speciality)
     } catch (error) {
-      throw new InternalServerErrorException('Unable to create new user')
+      throw new InternalServerErrorException('Unable to create new speciality')
     }
   }
 

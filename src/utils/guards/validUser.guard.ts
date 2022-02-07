@@ -12,7 +12,7 @@ export class ValidUserGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-    const noValidationRequired = (context.getHandler().name === 'validate' || (context.getHandler().name === 'create' && context.getClass().name === 'LocationController') || context.getClass().name === 'SpecialityController')
+    const noValidationRequired = (context.getHandler().name === 'validate' || (context.getHandler().name === 'create' && context.getClass().name === 'LocationController') || context.getClass().name === 'SpecialityController' || (context.getHandler().name === 'get' && context.getClass().name === 'UserController'))
 
     if(noValidationRequired){
       return true;
