@@ -224,10 +224,10 @@ export class UserService{
     }
 
 
-    // Delete every accounts that haven't used the app for 2 years
+    // Delete every accounts that haven't used the app for 3 years
     async deleteExpiredAccount() {
         const expiryDate = new Date();
-        expiryDate.setFullYear(expiryDate.getFullYear() - 2);
+        expiryDate.setFullYear(expiryDate.getFullYear() - 3);
         await this.userRepository.delete({
             lastConnectionDate: LessThanOrEqual(expiryDate)
         });
