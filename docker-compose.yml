@@ -1,0 +1,37 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:latest
+    ports:
+      - ${POSTGRES_PORT}:5432
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      PG_DATA: /var/lib/postgresql/data
+    volumes:
+      - polycovoit-volume:/var/lib/postgresql/data
+    networks:
+      - polycovoit-network
+
+  polycovoit-api:
+    container_name: polycovoit-api
+    build:
+      context: .
+      target: development
+    command: npm run start:dev
+    depends_on:
+      - postgres
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - polycovoit-network
+volumes:
+  polycovoit-volume:
+networks:
+  polycovoit-network:

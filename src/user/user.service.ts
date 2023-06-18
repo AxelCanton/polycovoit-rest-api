@@ -83,6 +83,12 @@ export class UserService{
         }
     }
 
+    async findByEmail(email: string) {
+        return await this.userRepository.findOne({
+            email
+        });
+    }
+
     async findForSpeciality(specialityName: String){
         return await this.userRepository.find({
             where: { 
