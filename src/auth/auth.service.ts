@@ -4,9 +4,6 @@ import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/user/entities/user.entity';
 
-import * as ldap from 'ldapjs';
-import { LdapUserDto } from 'src/user/dto/ldap-user.dto';
-
 @Injectable()
 export class AuthService {
 
@@ -46,8 +43,12 @@ export class AuthService {
         await this.userService.updateRefreshToken(refreshToken, user.id);
 
         return {
+            // -- Deprecated -- //
             access_token: accessToken,
             refresh_token: refreshToken,
+            // -- ---------- -- //
+            accessToken: accessToken,
+            refreshToken: refreshToken,
             isValid: user.isValid,
             isAdmin: user.isAdmin
         }
